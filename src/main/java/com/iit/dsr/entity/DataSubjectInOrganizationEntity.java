@@ -8,39 +8,27 @@ import lombok.NoArgsConstructor;
 import java.sql.Timestamp;
 
 @Entity
-@Table(name = "users")
+@Table(name = "data_subject_in_org")
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class UserEntity {
+public class DataSubjectInOrganizationEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "first_name", nullable = false, length = 225)
-    private String firstName;
-
-    @Column(name = "last_name", nullable = false, length = 100)
-    private String lastName;
-
-    @Column(nullable = false, unique = true, length = 225)
-    private String email;
-
-    @Column(nullable = false, length = 225)
-    private String password;
-
-    @Column(name = "is_verified", nullable = false)
-    private Integer isVerified;  // You can later change this to Boolean if desired
-
-    // --- Relationships ---
     @ManyToOne(optional = false)
     @JoinColumn(name = "status", referencedColumnName = "id")
     private StatusEntity status;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "role", referencedColumnName = "id")
-    private RoleEntity role;
+    @JoinColumn(name = "ds_code", referencedColumnName = "id")
+    private DataSubjectsEntity dsCode;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "dc_code", referencedColumnName = "id")
+    private DataControllerEntity dcCode;
 
     @Column(name = "created_time", nullable = false)
     private Timestamp createdTime;
