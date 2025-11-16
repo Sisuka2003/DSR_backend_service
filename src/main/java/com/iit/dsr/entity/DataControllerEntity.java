@@ -34,4 +34,10 @@ public class DataControllerEntity {
     @ManyToOne(optional = false)
     @JoinColumn(name = "key_identification", referencedColumnName = "id")
     private IdentificationKeyTypesEntity identificationKey;
+
+    @Column(name = "org_login_username", nullable = false, length = 45)
+    private String orgUsername;
+
+    @Column(name = "org_login_password", nullable = false, length = 45)
+    private String orgPassword;
 }

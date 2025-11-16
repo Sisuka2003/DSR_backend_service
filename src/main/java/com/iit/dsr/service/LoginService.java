@@ -1,6 +1,7 @@
-package com.iit.dsr.service.datasubject;
+package com.iit.dsr.service;
 
 import com.iit.dsr.dto.requests.dataSubject.DataSubjectLoginRequestDTO;
+import com.iit.dsr.dto.requests.dataController.DataControllerLoginRequestDTO;
 import com.iit.dsr.dto.responses.commons.CommonResponseDTO;
 import com.iit.dsr.entity.DataControllerEntity;
 import com.iit.dsr.entity.DataSubjectInOrganizationEntity;
@@ -11,15 +12,17 @@ import com.iit.dsr.repository.DataSubjectRepository;
 import com.iit.dsr.utils.CommonUtils;
 import com.iit.dsr.utils.Constants;
 import lombok.extern.log4j.Log4j2;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @Log4j2
-public class DataSubjectLoginService {
+public class LoginService {
 
 
     @Autowired
@@ -33,7 +36,7 @@ public class DataSubjectLoginService {
     @Autowired
     private DataSubjectInControllerRepository dataSubjectInControllerRepository;
 
-
+    //Data Subject / User login service - DSR portal
     public ResponseEntity<CommonResponseDTO> dataSubjectLogin(DataSubjectLoginRequestDTO dsLoginDto) {
         try{
             int dataControllerId = Integer.parseInt(dsLoginDto.getOrganizationID());
@@ -72,12 +75,40 @@ public class DataSubjectLoginService {
                 return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_EMPTY, "SUBJECT DOES NOT EXISTS WITHIN THE ORGANIZATION", null);
             }
 
-
-
             return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "SUCCESS", dataSubjectInOrganizationRecord);
         }catch (Exception e) {
             e.printStackTrace();
            return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "FAILED TO PROCESS", null);
+        }
+    }
+
+
+    //Data Controller / organization login service - DSR portal
+    public ResponseEntity<CommonResponseDTO> dataControllerLogin(DataControllerLoginRequestDTO dcLoginDto){
+        try{
+            log.info("dataControllerLogin => Invoked");
+            String organizationID = dcLoginDto.getOrganizationID();
+            String orgUsername = dcLoginDto.getOrgUsername();
+            String orgPassword = dcLoginDto.getOrgPassword();
+
+            DataControllerEntity dataControllerEntity = dataControllerRepository.findById(Integer.parseInt(organizationID)).orElse(null);
+
+            if(Objects.isNull(dataControllerEntity)){
+                log.info("dataControllerLogin => check existence with ID");
+                return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_EMPTY, "SELECTED ORGANIZATION DOES NOT EXIST", null);
+            }
+
+            if(dataControllerEntity.getOrgUsername().equals(orgUsername) && dataControllerEntity.getOrgPassword().equals(orgPassword)){
+                log.info("dataControllerLogin => check existence with username & password");
+                return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "INCORRECT USERNAME OR PASSWORD", null);
+            }
+
+            log.info("dataControllerLogin => organization exist with username & password");
+            return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "SUCCESS", dataControllerEntity);
+        }catch (Exception e){
+            log.info("dataControllerLogin => Failed to process");
+            e.printStackTrace();
+            return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "FAILED TO PROCESS", null);
         }
     }
 }

@@ -35,4 +35,7 @@ public class DataSubjectInOrganizationEntity {
 
     @Column(name = "last_updated_time", nullable = false)
     private Timestamp lastUpdatedTime;
+
+    @Column(name = "collected_data", nullable = false)
+    private String collectedData;
 }

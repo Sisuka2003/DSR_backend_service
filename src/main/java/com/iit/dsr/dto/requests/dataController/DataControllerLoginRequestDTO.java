@@ -1,0 +1,17 @@
+package com.iit.dsr.dto.requests.dataController;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
+
+@Data
+public class DataControllerLoginRequestDTO {
+
+    @JsonProperty("orgUsername")
+    private String orgUsername;
+
+    @JsonProperty("orgPassword")
+    private String orgPassword;
+
+    @JsonProperty("organizationID")
+    private String organizationID;
+}

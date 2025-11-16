@@ -1,8 +1,8 @@
 package com.iit.dsr.controller;
 
+import com.iit.dsr.dto.requests.dataController.DataControllerLoginRequestDTO;
 import com.iit.dsr.dto.requests.dataSubject.DataSubjectLoginRequestDTO;
-import com.iit.dsr.dto.responses.commons.CommonResponseDTO;
-import com.iit.dsr.service.datasubject.DataSubjectLoginService;
+import com.iit.dsr.service.LoginService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,17 +14,17 @@ import org.springframework.web.bind.annotation.*;
 public class LoginController {
 
     @Autowired
-    private DataSubjectLoginService datSubjectLoginService;
+    private LoginService loginService;
 
 
     @PostMapping("/datasubject")
     public ResponseEntity<?> dataSubjectLogin(@RequestBody DataSubjectLoginRequestDTO dsLoginDto){
         log.info(dsLoginDto.toString());
-        return datSubjectLoginService.dataSubjectLogin(dsLoginDto);
+        return loginService.dataSubjectLogin(dsLoginDto);
     }
 
     @PostMapping("/datacontroller")
-    public ResponseEntity<?> dataControllerLogin(@RequestBody String req){
-        return ResponseEntity.ok("Success");
+    public ResponseEntity<?> dataControllerLogin(@RequestBody DataControllerLoginRequestDTO dcLoginDto){
+        return loginService.dataControllerLogin(dcLoginDto);
     }
 }
