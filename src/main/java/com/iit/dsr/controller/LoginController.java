@@ -1,7 +1,7 @@
 package com.iit.dsr.controller;
 
-import com.iit.dsr.dto.requests.dataController.DataControllerLoginRequestDTO;
-import com.iit.dsr.dto.requests.dataSubject.DataSubjectLoginRequestDTO;
+import com.iit.dsr.dto.requests.login.DataControllerLoginRequestDTO;
+import com.iit.dsr.dto.requests.login.DataSubjectLoginRequestDTO;
 import com.iit.dsr.service.LoginService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;

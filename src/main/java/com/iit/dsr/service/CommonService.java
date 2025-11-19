@@ -23,17 +23,17 @@ public class CommonService {
     private DataControllerRepository dataControllerRepository;
 
 
-    public ResponseEntity<CommonResponseDTO> retrieveAllActiveOrganizations(){
+    public ResponseEntity<?> retrieveAllActiveOrganizations(){
         try{
             List<DataControllerEntity> allActiveDataControllers = dataControllerRepository.getAllActiveDataControllers(Constants.ACTIVE);
             return allActiveDataControllers == null ?
-                    commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED,"FAILED TO PROCESS",null)
+                    commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED,"FAILED TO PROCESS",null,null,false)
                     :
-                    commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS,"SUCCESS",allActiveDataControllers);
+                    commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS,"SUCCESS",allActiveDataControllers,null,false);
 
         }catch (Exception e){
             e.printStackTrace();
-            return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED,"FAILED TO PROCESS",null);
+            return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED,"FAILED TO PROCESS",null,null,false);
         }
     }
 }

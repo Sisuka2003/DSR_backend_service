@@ -1,4 +1,4 @@
-package com.iit.dsr.dto.requests.dataController;
+package com.iit.dsr.dto.requests.login;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;

@@ -13,4 +13,5 @@ public class CommonResponseDTO {
     private String responseStatusCode;
     private String responseMessage;
     private Object data;
+    private byte[] report;
 }
