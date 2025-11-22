@@ -1,5 +1,7 @@
 package com.iit.dsr.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.iit.dsr.dto.requests.login.DataSubjectLoginRequestDTO;
 import com.iit.dsr.dto.requests.operations.DataSubjectOperationsRequestDto;
 import com.iit.dsr.dto.responses.commons.CommonResponseDTO;
@@ -7,8 +9,11 @@ import com.iit.dsr.entity.DataSubjectInOrganizationEntity;
 import com.iit.dsr.repository.DataSubjectInControllerRepository;
 import com.iit.dsr.utils.CommonUtils;
 import com.iit.dsr.utils.Constants;
-import com.lowagie.text.Document;
-import com.lowagie.text.Paragraph;
+import com.lowagie.text.*;
+import com.lowagie.text.Image;
+import com.lowagie.text.Rectangle;
+import com.lowagie.text.pdf.PdfPCell;
+import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +21,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.awt.*;
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -70,13 +78,98 @@ public class DataSubjectOperationsService {
     //Generate Report
     public ResponseEntity<?> generateDataExportReport(DataSubjectOperationsRequestDto requestDto) {
         try {
+
+            DataSubjectInOrganizationEntity customerRecordFromOrganization = dataSubjectInControllerRepository.getCustomerRecordFromOrganization(Integer.parseInt(requestDto.getDsCode()), Integer.parseInt(requestDto.getDcCode()), Constants.ACTIVE);
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, Object> collectedData = objectMapper.readValue(
+                    customerRecordFromOrganization.getCollectedData(),
+                    new TypeReference<Map<String, Object>>() {}
+            );
+
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
             Document document = new Document();
             PdfWriter.getInstance(document, baos);
-
             document.open();
-            document.add(new Paragraph("dfgdgd dgdfgfd dfgdf dgdfgdf"));
+
+            // header - START ----------------------------------------------
+            String imagePath = "src/main/resources/static/images/emblem.png";
+            Image emblem = Image.getInstance(imagePath);
+            emblem.scaleToFit(60, 60);
+            emblem.setAlignment(Element.ALIGN_CENTER);
+
+
+            Paragraph propertyOfSriLankaTitle = new Paragraph("This is a Property of the Sri Lanka Government");
+            propertyOfSriLankaTitle.setAlignment(Element.ALIGN_CENTER);
+            propertyOfSriLankaTitle.setSpacingBefore(5);
+
+            Paragraph DSRTitle = new Paragraph("Data Subject Request Portal");
+            DSRTitle.setAlignment(Element.ALIGN_CENTER);
+
+            Paragraph YearTitle = new Paragraph("2025/2026");
+            YearTitle.setAlignment(Element.ALIGN_CENTER);
+            // header - END ----------------------------------------------
+
+            //Body - START -----------------------------------------------
+
+            PdfPTable dRInformationTable = new PdfPTable(1);
+            dRInformationTable.setWidthPercentage(100);
+            dRInformationTable.setSpacingBefore(14);
+
+            PdfPCell dRInformationTableCell = new PdfPCell(new Phrase("Data Requestor Information"));
+            dRInformationTableCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+            dRInformationTableCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+            dRInformationTableCell.setPadding(10);
+            dRInformationTableCell.setBackgroundColor(Color.pink);
+            dRInformationTableCell.setBorder(Rectangle.NO_BORDER);
+
+            dRInformationTable.addCell(dRInformationTableCell);
+
+
+
+            Paragraph subjectNameText = new Paragraph("   Subject Name : "+customerRecordFromOrganization.getDsCode().getFirstName()+customerRecordFromOrganization.getDsCode().getLastName());
+            subjectNameText.setSpacingBefore(15);
+            Paragraph subjectNicText = new Paragraph("   Subject NIC     : "+customerRecordFromOrganization.getDsCode().getNicNumber());
+            Paragraph organizationText = new Paragraph("   Request Code : ");
+            organizationText.setSpacingAfter(15);
+
+
+
+            PdfPTable dRInformationDataTitle = new PdfPTable(1);
+            dRInformationDataTitle.setWidthPercentage(100);
+            dRInformationDataTitle.setSpacingBefore(15);
+            PdfPCell dRInformationDataCell = new PdfPCell(new Phrase("Data Subject Information"));
+            dRInformationDataCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+            dRInformationDataCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+            dRInformationDataCell.setPadding(10);
+            dRInformationDataCell.setBackgroundColor(Color.pink);
+            dRInformationDataCell.setBorder(Rectangle.NO_BORDER);
+            dRInformationDataTitle.addCell(dRInformationDataCell);
+
+
+
+
+
+            document.add(emblem);
+            document.add(propertyOfSriLankaTitle);
+            document.add(DSRTitle);
+            document.add(YearTitle);
+            document.add(dRInformationTable);
+            document.add(subjectNameText);
+            document.add(subjectNicText);
+            document.add(organizationText);
+            document.add(dRInformationDataTitle);
+
+
+            for (Map.Entry<String, Object> entry : collectedData.entrySet()) {
+                ArrayList<PdfPCell> pdfPCells1 = new ArrayList<>();
+                pdfPCells1.add(commonUtils.generateReportTableCell("   "+entry.getKey()+" :"));
+                pdfPCells1.add(commonUtils.generateReportTableCell(String.valueOf(entry.getValue())));
+                PdfPTable dRDataTable = commonUtils.generateReportTable(2, 50, 15, pdfPCells1);
+                document.add(dRDataTable);
+            }
+
+            //Body - END -----------------------------------------------
             document.close();
 
             return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "REPORT GENERATION SUCCESS", null,baos.toByteArray(),true);
@@ -86,5 +179,7 @@ public class DataSubjectOperationsService {
             return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "FAILED TO PROCESS", null,null,false);
         }
     }
+
+
 
 }
