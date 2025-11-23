@@ -10,4 +10,8 @@ public class Constants {
     public static final String EMAIL = "EMAIL";
     public static final String MOBILE = "MOB";
     public static final String CUSTOMERID = "CUSTID";
+    public static final String METADATA ="METADATA";
+    public static final String PROFILE ="PROFILE";
+    public static final String SERVICEDATA ="SERVICEDATA";
+    public static final String CONSENTS ="CONSENTS";
 }

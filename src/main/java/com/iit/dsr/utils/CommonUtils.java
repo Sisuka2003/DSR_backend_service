@@ -42,6 +42,7 @@ public class CommonUtils {
         dRDataTable1.setWidthPercentage(widthPercentage);
         dRDataTable1.setHorizontalAlignment(Element.ALIGN_LEFT);
         dRDataTable1.setSpacingBefore(spacingBefore);
+        dRDataTable1.setSpacingAfter(spacingBefore);
 
         for(PdfPCell record : data){
             dRDataTable1.addCell(record);
@@ -56,5 +57,21 @@ public class CommonUtils {
         dRDataCell.setBorder(Rectangle.NO_BORDER);
 
         return dRDataCell;
+    }
+
+
+    public String titleText (String entryText){
+        switch (entryText){
+            case Constants.METADATA :
+                return "META INFORMATION";
+            case Constants.PROFILE:
+                return "PROFILE INFORMATION";
+            case Constants.SERVICEDATA:
+                return "SERVICE DATA RECORDS";
+            case Constants.CONSENTS:
+                return "CONSENT INFORMATION";
+            default:
+                return "UNKNOWN";
+        }
     }
 }

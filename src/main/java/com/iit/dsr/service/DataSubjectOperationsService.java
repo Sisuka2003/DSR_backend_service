@@ -116,7 +116,7 @@ public class DataSubjectOperationsService {
             dRInformationTable.setWidthPercentage(100);
             dRInformationTable.setSpacingBefore(14);
 
-            PdfPCell dRInformationTableCell = new PdfPCell(new Phrase("Data Requestor Information"));
+            PdfPCell dRInformationTableCell = new PdfPCell(new Phrase("DATA SUBJECT REQUEST DETAILS"));
             dRInformationTableCell.setHorizontalAlignment(Element.ALIGN_LEFT);
             dRInformationTableCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
             dRInformationTableCell.setPadding(10);
@@ -138,6 +138,7 @@ public class DataSubjectOperationsService {
             PdfPTable dRInformationDataTitle = new PdfPTable(1);
             dRInformationDataTitle.setWidthPercentage(100);
             dRInformationDataTitle.setSpacingBefore(15);
+            dRInformationDataTitle.setSpacingAfter(15);
             PdfPCell dRInformationDataCell = new PdfPCell(new Phrase("Data Subject Information"));
             dRInformationDataCell.setHorizontalAlignment(Element.ALIGN_LEFT);
             dRInformationDataCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
@@ -162,13 +163,45 @@ public class DataSubjectOperationsService {
 
 
             for (Map.Entry<String, Object> entry : collectedData.entrySet()) {
-                ArrayList<PdfPCell> pdfPCells1 = new ArrayList<>();
-                pdfPCells1.add(commonUtils.generateReportTableCell("   "+entry.getKey()+" :"));
-                pdfPCells1.add(commonUtils.generateReportTableCell(String.valueOf(entry.getValue())));
-                PdfPTable dRDataTable = commonUtils.generateReportTable(2, 50, 15, pdfPCells1);
-                document.add(dRDataTable);
-            }
+                Object value = entry.getValue();
+                ArrayList<PdfPCell> pdfPCells = new ArrayList<>();
 
+                PdfPCell titleCell = new PdfPCell(new Phrase(commonUtils.titleText(entry.getKey().toUpperCase())));
+                titleCell.setBackgroundColor(Color.LIGHT_GRAY);
+                titleCell.setPadding(5);
+                titleCell.setPaddingBottom(8);
+                titleCell.setColspan(2); // Span across two columns
+                PdfPTable titleTable = new PdfPTable(2);
+                titleTable.setWidthPercentage(100);
+                titleTable.addCell(titleCell);
+                document.add(titleTable);
+
+                if (value instanceof Map) {
+                    // It's already a nested Map
+                    Map<String, Object> nestedMap = (Map<String, Object>) value;
+                    for (Map.Entry<String, Object> nestedEntry : nestedMap.entrySet()) {
+                        pdfPCells.add(commonUtils.generateReportTableCell("   " + nestedEntry.getKey() + " :"));
+                        pdfPCells.add(commonUtils.generateReportTableCell(String.valueOf(nestedEntry.getValue())));
+                    }
+                } else if (value instanceof String) {
+
+                    // Sometimes JSON libraries return Strings; parse them if necessary
+                    Map<String, Object> nestedMap = objectMapper.readValue((String) value, new TypeReference<Map<String, Object>>() {});
+                    for (Map.Entry<String, Object> nestedEntry : nestedMap.entrySet()) {
+                        pdfPCells.add(commonUtils.generateReportTableCell("   " + nestedEntry.getKey() + " :"));
+                        pdfPCells.add(commonUtils.generateReportTableCell(String.valueOf(nestedEntry.getValue())));
+                    }
+                } else {
+
+                    // Primitive value
+                    pdfPCells.add(commonUtils.generateReportTableCell("   " + entry.getKey() + " :"));
+                    pdfPCells.add(commonUtils.generateReportTableCell(String.valueOf(entry.getValue())));
+                }
+
+
+                PdfPTable table = commonUtils.generateReportTable(2, 50, 15, pdfPCells);
+                document.add(table);
+            }
             //Body - END -----------------------------------------------
             document.close();
 
