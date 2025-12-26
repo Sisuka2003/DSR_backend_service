@@ -87,20 +87,14 @@ public class LoginService {
     public ResponseEntity<?> dataControllerLogin(DataControllerLoginRequestDTO dcLoginDto){
         try{
             log.info("dataControllerLogin => Invoked");
-            String organizationID = dcLoginDto.getOrganizationID();
             String orgUsername = dcLoginDto.getOrgUsername();
             String orgPassword = dcLoginDto.getOrgPassword();
 
-            DataControllerEntity dataControllerEntity = dataControllerRepository.findById(Integer.parseInt(organizationID)).orElse(null);
+            DataControllerEntity dataControllerEntity = dataControllerRepository.getOrganizationByUsernameAndPassword(orgUsername,orgPassword,Constants.ACTIVE);
 
             if(Objects.isNull(dataControllerEntity)){
                 log.info("dataControllerLogin => check existence with ID");
                 return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_EMPTY, "SELECTED ORGANIZATION DOES NOT EXIST", null,null,false);
-            }
-
-            if(dataControllerEntity.getOrgUsername().equals(orgUsername) && dataControllerEntity.getOrgPassword().equals(orgPassword)){
-                log.info("dataControllerLogin => check existence with username & password");
-                return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "INCORRECT USERNAME OR PASSWORD", null,null,false);
             }
 
             log.info("dataControllerLogin => organization exist with username & password");

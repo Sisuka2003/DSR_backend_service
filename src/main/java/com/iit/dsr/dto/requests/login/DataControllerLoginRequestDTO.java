@@ -12,6 +12,4 @@ public class DataControllerLoginRequestDTO {
     @JsonProperty("orgPassword")
     private String orgPassword;
 
-    @JsonProperty("organizationID")
-    private String organizationID;
 }

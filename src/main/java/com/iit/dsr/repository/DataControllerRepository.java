@@ -14,6 +14,9 @@ public interface DataControllerRepository extends JpaRepository<DataControllerEn
     @Query("SELECT DCE FROM DataControllerEntity DCE WHERE DCE.orgStatus.code = ?1")
     List<DataControllerEntity> getAllActiveDataControllers(String status);
 
+    @Query("SELECT DCE FROM DataControllerEntity DCE WHERE (DCE.orgUsername=?1 AND DCE.orgPassword=?2) AND DCE.orgStatus.code = ?3 ")
+    DataControllerEntity getOrganizationByUsernameAndPassword(String username,String password,String status);
+
     Optional<DataControllerEntity> findById(int id);
 
 }
