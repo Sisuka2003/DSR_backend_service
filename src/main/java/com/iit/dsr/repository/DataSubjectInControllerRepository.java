@@ -16,10 +16,10 @@ public interface DataSubjectInControllerRepository extends JpaRepository<DataSub
 
 
     @Modifying
-    @Query("UPDATE DataSubjectInOrganizationEntity DSIO SET DSIO.collectedData =?1")
-    int updateCollectedDataOfDataSubject(String collectedData);
+    @Query("UPDATE DataSubjectInOrganizationEntity DSIO SET DSIO.collectedData =?1 WHERE DSIO.dsCode.id =?2 AND DSIO.dcCode.id =?3 AND DSIO.status.id =?4")
+    int updateCollectedDataOfDataSubject(String collectedData,Integer dsCode, Integer dcCode, Integer statusCode);
 
     @Modifying
-    @Query("DELETE FROM DataSubjectInOrganizationEntity DSIO WHERE DSIO.id =?1")
-    int deleteCollectedDataOfDataSubject(int id);
+    @Query("UPDATE DataSubjectInOrganizationEntity DSIO SET DSIO.status.id = ?3 WHERE DSIO.dsCode.id =?1 AND DSIO.dcCode.id =?2")
+    int deleteCollectedDataOfDataSubject(Integer dsCode, Integer dcCode, Integer statusCode);
 }

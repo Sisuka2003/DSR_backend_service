@@ -19,4 +19,6 @@ public class DataSubjectOperationsRequestDto {
     private String collectedData;
     @JsonProperty("mapId")
     private int mapId;
+    @JsonProperty("status")
+    private String status;
 }

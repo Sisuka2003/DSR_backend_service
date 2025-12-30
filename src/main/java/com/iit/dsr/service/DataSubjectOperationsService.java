@@ -41,6 +41,7 @@ public class DataSubjectOperationsService {
     //Get Data Subjects Collected_data from the organization
     public ResponseEntity<?> getStoredData(DataSubjectOperationsRequestDto requestDto) {
         try {
+            log.info("DataSubjectOperationsService => getStoredData() => invoked with "+requestDto);
             DataSubjectInOrganizationEntity customerRecordFromOrganization = dataSubjectInControllerRepository.getCustomerRecordFromOrganization(Integer.parseInt(requestDto.getDsCode()), Integer.parseInt(requestDto.getDcCode()), Constants.ACTIVE);
             return Objects.isNull(customerRecordFromOrganization) ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_EMPTY, "NO DATA EXISTS", null,null,false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA FETCHED SUCCESSFULLY", customerRecordFromOrganization,null,false);
         }catch (Exception e){
@@ -54,7 +55,9 @@ public class DataSubjectOperationsService {
     //Update Data Subjects Collected_data from the organization
     public ResponseEntity<?> updatedStoredData(DataSubjectOperationsRequestDto requestDto) {
         try {
-            return dataSubjectInControllerRepository.updateCollectedDataOfDataSubject(requestDto.getCollectedData()) > 0 ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA CORRECTION SUCCESS", null,null,false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "DATA CORRECTION FAILED", null,null,false);
+
+            log.info("DataSubjectOperationsService => updatedStoredData() => invoekd with "+requestDto);
+            return dataSubjectInControllerRepository.updateCollectedDataOfDataSubject(requestDto.getCollectedData(), Integer.parseInt(requestDto.getDsCode()), Integer.parseInt(requestDto.getDcCode()), Integer.parseInt(requestDto.getStatus())) > 0 ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA CORRECTION SUCCESS", null,null,false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "DATA CORRECTION FAILED", null,null,false);
         }catch (Exception e){
             log.info("updatedStoredData => Failed To Process");
             e.printStackTrace();
@@ -66,7 +69,7 @@ public class DataSubjectOperationsService {
     //Delete Data Subjects Collected_data from the organization
     public ResponseEntity<?> deleteStoredData(DataSubjectOperationsRequestDto requestDto) {
         try {
-            return dataSubjectInControllerRepository.deleteCollectedDataOfDataSubject(requestDto.getMapId()) > 0 ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA CORRECTION SUCCESS", null,null,false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "DATA CORRECTION FAILED", null,null,false);
+            return dataSubjectInControllerRepository.deleteCollectedDataOfDataSubject(Integer.parseInt(requestDto.getDsCode()), Integer.parseInt(requestDto.getDcCode()), Integer.parseInt(requestDto.getStatus())) > 0 ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA CORRECTION SUCCESS", null,null,false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "DATA CORRECTION FAILED", null,null,false);
         }catch (Exception e){
             log.info("deleteStoredData => Failed To Process");
             e.printStackTrace();
