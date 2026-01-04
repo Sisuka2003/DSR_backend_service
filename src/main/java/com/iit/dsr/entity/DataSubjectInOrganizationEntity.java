@@ -38,4 +38,11 @@ public class DataSubjectInOrganizationEntity {
 
     @Column(name = "collected_data", nullable = false)
     private String collectedData;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "activity_status", referencedColumnName = "id")
+    private StatusEntity activityStatus;
+
+    @Column(name = "backuped_data", nullable = false)
+    private String backupData;
 }

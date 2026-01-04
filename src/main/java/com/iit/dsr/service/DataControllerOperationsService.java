@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -39,13 +40,16 @@ public class DataControllerOperationsService {
     @Autowired
     private DataControllerRepository dataControllerRepository;
 
+    @Autowired
+    private DataSubjectInControllerRepository dataSubjectInControllerRepository;
+
     public ResponseEntity<?> getStoredData(DataControllerOperationsRequestDto requestDto) {
         try {
             log.info("DataControllerOperationsService => getStoredData() => invoked with "+requestDto);
             DataControllerEntity customerRecordFromOrganization = dataControllerRepository.getControllerData(Integer.parseInt(requestDto.getDcCode()), Constants.ACTIVE);
             return Objects.isNull(customerRecordFromOrganization) ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_EMPTY, "NO DATA EXISTS", null,null,false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA FETCHED SUCCESSFULLY", customerRecordFromOrganization,null,false);
         }catch (Exception e){
-            log.info("getStoredData => Failed To Process");
+            log.info("DataControllerOperationsService => getStoredData() => Failed To Process");
             e.printStackTrace();
             return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "FAILED TO PROCESS", null,null,false);
 
@@ -54,11 +58,10 @@ public class DataControllerOperationsService {
 
     public ResponseEntity<?> updatedStoredData(DataControllerOperationsRequestDto requestDto) {
         try {
-
             log.info("DataControllerOperationsService => updatedStoredData() => invoekd with "+requestDto);
             return dataControllerRepository.updateDataController(requestDto.getUsername(), requestDto.getPassword(), Integer.parseInt(requestDto.getDcCode()), Constants.ACTIVE) > 0 ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA CORRECTION SUCCESS", null,null,false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "DATA CORRECTION FAILED", null,null,false);
         }catch (Exception e){
-            log.info("updatedStoredData => Failed To Process");
+            log.info("DataControllerOperationsService => updatedStoredData() => Failed To Process");
             e.printStackTrace();
             return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "FAILED TO PROCESS", null,null,false);
 
@@ -67,9 +70,10 @@ public class DataControllerOperationsService {
 
     public ResponseEntity<?> deleteStoredData(DataControllerOperationsRequestDto requestDto) {
         try {
+            log.info("DataControllerOperationsService => deleteStoredData() => invoked with "+requestDto);
             return dataControllerRepository.deleteControllerRecord(Integer.parseInt(requestDto.getDcCode()), Integer.parseInt(requestDto.getStatus())) > 0 ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA CORRECTION SUCCESS", null,null,false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "DATA CORRECTION FAILED", null,null,false);
         }catch (Exception e){
-            log.info("DataControllerOperationsService => del => Failed To Process");
+            log.info("DataControllerOperationsService => deleteStoredData() => Failed To Process");
             e.printStackTrace();
             return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "FAILED TO PROCESS", null,null,false);
         }
@@ -77,5 +81,17 @@ public class DataControllerOperationsService {
 
 
 
+    public ResponseEntity<?> getDataSubjectDataOfController(DataControllerOperationsRequestDto requestDto) {
+        try {
+            log.info("DataControllerOperationsService => getDataSubjectDataOfController() => invoked with "+requestDto);
+            List<DataSubjectInOrganizationEntity> customerRecordFromOrganization = dataSubjectInControllerRepository.getCustomerRecordFromOrganizationMapped(Integer.parseInt(requestDto.getDcCode()), Constants.ACTIVE);
+            return Objects.isNull(customerRecordFromOrganization) ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_EMPTY, "NO DATA EXISTS", null,null,false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA FETCHED SUCCESSFULLY", customerRecordFromOrganization,null,false);
+        }catch (Exception e){
+            log.info("DataControllerOperationsService => getDataSubjectDataOfController() => Failed To Process");
+            e.printStackTrace();
+            return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "FAILED TO PROCESS", null,null,false);
+
+        }
+    }
 
 }

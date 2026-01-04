@@ -36,4 +36,10 @@ public class DataOrganizationOperationsController {
         return dataControllerOperationsService.deleteStoredData(requestDto);
     }
 
+    @PostMapping(value = "/requestAssociatedDataSubjectsWithOrganization")
+    public ResponseEntity<?> requestMappedDataSubjects(@RequestBody DataControllerOperationsRequestDto requestDto){
+        log.info("DataOrganizationOperationsController => requestAssociatedDataSubjectsWithOrganization => invoked with"+requestDto);
+        return dataControllerOperationsService.getDataSubjectDataOfController(requestDto);
+    }
+
 }

@@ -40,4 +40,7 @@ public class DataControllerEntity {
 
     @Column(name = "org_login_password", nullable = false, length = 45)
     private String orgPassword;
+
+    @Column(name = "notifications", nullable = false)
+    private int notifications;
 }
