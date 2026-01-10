@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -55,8 +56,12 @@ public class DataSubjectOperationsService {
     //Update Data Subjects Collected_data from the organization
     public ResponseEntity<?> updatedStoredData(DataSubjectOperationsRequestDto requestDto) {
         try {
+            log.info("DataSubjectOperationsService => updatedStoredData() => invoked with "+requestDto);
 
-            log.info("DataSubjectOperationsService => updatedStoredData() => invoekd with "+requestDto);
+            if(!dataSubjectInControllerRepository.checkForPendingRequestsByDataSubject(Integer.parseInt(requestDto.getDsCode()), Integer.parseInt(requestDto.getDcCode()), Constants.PENDING, Constants.QUEUED).isEmpty()){
+                return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "PENDING REQUESTS EXISTS", null,null,false);
+            }
+
             return dataSubjectInControllerRepository.updateCollectedDataOfDataSubject(requestDto.getCollectedData(), Integer.parseInt(requestDto.getDsCode()), Integer.parseInt(requestDto.getDcCode()), Integer.parseInt(requestDto.getStatus())) > 0 ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA CORRECTION SUCCESS", null,null,false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "DATA CORRECTION FAILED", null,null,false);
         }catch (Exception e){
             log.info("updatedStoredData => Failed To Process");
