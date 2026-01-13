@@ -6,8 +6,10 @@ import com.iit.dsr.dto.requests.operations.DataControllerOperationsRequestDto;
 import com.iit.dsr.dto.requests.operations.DataSubjectOperationsRequestDto;
 import com.iit.dsr.entity.DataControllerEntity;
 import com.iit.dsr.entity.DataSubjectInOrganizationEntity;
+import com.iit.dsr.entity.StatusEntity;
 import com.iit.dsr.repository.DataControllerRepository;
 import com.iit.dsr.repository.DataSubjectInControllerRepository;
+import com.iit.dsr.repository.StatusRepository;
 import com.iit.dsr.utils.CommonUtils;
 import com.iit.dsr.utils.Constants;
 import com.lowagie.text.*;
@@ -42,6 +44,9 @@ public class DataControllerOperationsService {
 
     @Autowired
     private DataSubjectInControllerRepository dataSubjectInControllerRepository;
+
+    @Autowired
+    private StatusRepository statusRepository;
 
     public ResponseEntity<?> getStoredData(DataControllerOperationsRequestDto requestDto) {
         try {
@@ -79,8 +84,6 @@ public class DataControllerOperationsService {
         }
     }
 
-
-
     public ResponseEntity<?> getDataSubjectDataOfController(DataControllerOperationsRequestDto requestDto) {
         try {
             log.info("DataControllerOperationsService => getDataSubjectDataOfController() => invoked with "+requestDto);
@@ -94,4 +97,14 @@ public class DataControllerOperationsService {
         }
     }
 
+    public ResponseEntity<?> rejectDataSubjectDataModificationOrDeletionRequest(DataControllerOperationsRequestDto requestDto){
+        try {
+            log.info("DataControllerOperationsService => rejectDataSubjectDataModificationOrDeletionRequest() => invoked with "+requestDto);
+            return dataSubjectInControllerRepository.rejectDataSubjectDataModificationOrDeletionRequest(statusRepository.getStatusRecordFromCode(Constants.REJECTED).getId(), Integer.parseInt(requestDto.getDsCode()), Integer.parseInt(requestDto.getDcCode()), Integer.parseInt(requestDto.getStatus())) > 0 ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA CORRECTION SUCCESS", null,null,false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "DATA CORRECTION FAILED", null,null,false);
+        }catch (Exception e){
+            log.info("DataControllerOperationsService => rejectDataSubjectDataModificationOrDeletionRequest() => Failed To Process");
+            e.printStackTrace();
+            return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "FAILED TO PROCESS", null,null,false);
+        }
+    }
 }

@@ -41,4 +41,15 @@ public class DataSubjectOperationsController {
     public ResponseEntity<?> requestWithdrawConsent(@RequestBody DataSubjectOperationsRequestDto requestDto){
         return null;
     }
+
+
+    @PostMapping(value = "/generateOtpCode")
+    public ResponseEntity<?> generateLoginOTP(@RequestBody DataSubjectOperationsRequestDto requestDto){
+        return dataSubjectOperationsService.sendOtpEmail(requestDto);
+    }
+
+    @PostMapping(value = "/verifyOtpCode")
+    public ResponseEntity<?> verifyLoginOTP(@RequestBody DataSubjectOperationsRequestDto requestDto){
+        return dataSubjectOperationsService.verifyOtpCode(requestDto);
+    }
 }

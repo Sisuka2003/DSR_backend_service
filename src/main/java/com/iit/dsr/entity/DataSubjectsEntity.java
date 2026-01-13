@@ -51,4 +51,7 @@ public class DataSubjectsEntity {
 
     @Column(name = "last_updated_time", nullable = false)
     private Timestamp lastUpdatedTime;
+
+    @Column(name = "otp_code", length = 6)
+    private String otpCode;
 }

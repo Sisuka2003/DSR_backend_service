@@ -15,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 
 @Component
@@ -73,5 +74,10 @@ public class CommonUtils {
             default:
                 return "UNKNOWN";
         }
+    }
+    private static final SecureRandom RANDOM = new SecureRandom();
+
+    public static String generateOtp() {
+        return String.valueOf(100000 + RANDOM.nextInt(900000));
     }
 }

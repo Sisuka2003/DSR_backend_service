@@ -20,4 +20,5 @@ public class CommonController {
     public ResponseEntity<?> retrieveAllActiveOrganizations(){
         return commonService.retrieveAllActiveOrganizations();
     }
+
 }

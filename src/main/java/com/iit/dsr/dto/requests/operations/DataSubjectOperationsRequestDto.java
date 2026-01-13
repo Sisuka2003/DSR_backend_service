@@ -21,4 +21,10 @@ public class DataSubjectOperationsRequestDto {
     private int mapId;
     @JsonProperty("status")
     private String status;
+    @JsonProperty("IsControllerApproved")
+    private boolean IsControllerApproved;
+    @JsonProperty("recipientEmail")
+    private String recipientEmail;
+    @JsonProperty("otpCode")
+    private String otpCode;
 }

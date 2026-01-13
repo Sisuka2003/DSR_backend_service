@@ -38,8 +38,14 @@ public class DataOrganizationOperationsController {
 
     @PostMapping(value = "/requestAssociatedDataSubjectsWithOrganization")
     public ResponseEntity<?> requestMappedDataSubjects(@RequestBody DataControllerOperationsRequestDto requestDto){
-        log.info("DataOrganizationOperationsController => requestAssociatedDataSubjectsWithOrganization => invoked with"+requestDto);
+        log.info("DataOrganizationOperationsController => requestMappedDataSubjects => invoked with"+requestDto);
         return dataControllerOperationsService.getDataSubjectDataOfController(requestDto);
+    }
+
+    @PostMapping(value = "/rejectDataSubjectDataModificationRequest")
+    public ResponseEntity<?> rejectDataSubjectDataModificationRequest(@RequestBody DataControllerOperationsRequestDto requestDto){
+        log.info("DataOrganizationOperationsController => rejectDataSubjectDataModificationRequest => invoked with"+requestDto);
+        return dataControllerOperationsService.rejectDataSubjectDataModificationOrDeletionRequest(requestDto);
     }
 
 }

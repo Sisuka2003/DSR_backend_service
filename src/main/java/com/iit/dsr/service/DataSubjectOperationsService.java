@@ -2,11 +2,15 @@ package com.iit.dsr.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.iit.dsr.controller.DataSubjectOperationsController;
 import com.iit.dsr.dto.requests.login.DataSubjectLoginRequestDTO;
 import com.iit.dsr.dto.requests.operations.DataSubjectOperationsRequestDto;
 import com.iit.dsr.dto.responses.commons.CommonResponseDTO;
 import com.iit.dsr.entity.DataSubjectInOrganizationEntity;
+import com.iit.dsr.entity.DataSubjectsEntity;
 import com.iit.dsr.repository.DataSubjectInControllerRepository;
+import com.iit.dsr.repository.DataSubjectRepository;
+import com.iit.dsr.repository.StatusRepository;
 import com.iit.dsr.utils.CommonUtils;
 import com.iit.dsr.utils.Constants;
 import com.lowagie.text.*;
@@ -15,18 +19,23 @@ import com.lowagie.text.Rectangle;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.awt.*;
 import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 @Service
 @Log4j2
@@ -38,6 +47,14 @@ public class DataSubjectOperationsService {
 
     @Autowired
     private DataSubjectInControllerRepository dataSubjectInControllerRepository;
+
+    @Autowired
+    private DataSubjectRepository dataSubjectRepository;
+    @Autowired
+    private StatusRepository statusRepository;
+
+    @Autowired
+    private JavaMailSender mailSender;
 
     //Get Data Subjects Collected_data from the organization
     public ResponseEntity<?> getStoredData(DataSubjectOperationsRequestDto requestDto) {
@@ -58,10 +75,12 @@ public class DataSubjectOperationsService {
         try {
             log.info("DataSubjectOperationsService => updatedStoredData() => invoked with "+requestDto);
 
+            if(requestDto.isIsControllerApproved()){
+                return dataSubjectInControllerRepository.updateDataSubjectDataOnApproval(requestDto.getCollectedData(),statusRepository.getStatusRecordFromCode(Constants.APPROVED).getId(), Integer.parseInt(requestDto.getDsCode()), Integer.parseInt(requestDto.getDcCode()), Integer.parseInt(requestDto.getStatus())) > 0 ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA CORRECTION SUCCESS", null,null,false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "DATA CORRECTION FAILED", null,null,false);
+            }
             if(!dataSubjectInControllerRepository.checkForPendingRequestsByDataSubject(Integer.parseInt(requestDto.getDsCode()), Integer.parseInt(requestDto.getDcCode()), Constants.PENDING, Constants.QUEUED).isEmpty()){
                 return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "PENDING REQUESTS EXISTS", null,null,false);
             }
-
             return dataSubjectInControllerRepository.updateCollectedDataOfDataSubject(requestDto.getCollectedData(), Integer.parseInt(requestDto.getDsCode()), Integer.parseInt(requestDto.getDcCode()), Integer.parseInt(requestDto.getStatus())) > 0 ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA CORRECTION SUCCESS", null,null,false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "DATA CORRECTION FAILED", null,null,false);
         }catch (Exception e){
             log.info("updatedStoredData => Failed To Process");
@@ -222,5 +241,55 @@ public class DataSubjectOperationsService {
     }
 
 
+    public ResponseEntity<?> sendOtpEmail(DataSubjectOperationsRequestDto requestDto) {
+
+        try {
+            String code = CommonUtils.generateOtp();
+
+            int modifiedOtpCodeStatus = dataSubjectRepository.updateTheOtpCodeColumnIfUserVerificationIsFalse(code, Integer.parseInt(requestDto.getDsCode()), Constants.ACTIVE);
+
+            if(modifiedOtpCodeStatus == 0){
+                return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "VERIFICATION PROCEDURE FAILED", null, null, false);
+            }
+
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+            helper.setFrom("sisukaweerasinghe@gmail.com");
+            helper.setTo(requestDto.getRecipientEmail());
+            helper.setSubject("OTP Verification");
+
+            try (var inputStream = Objects.requireNonNull(
+                    DataSubjectOperationsController.class.getResourceAsStream("/templates/OtpEmailTemplate.html"))) {
+
+                String htmlTemplate = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+
+                htmlTemplate = htmlTemplate.replace("{{userName}}", "Sisuka Weerasinghe")
+                        .replace("{{otp}}", code)
+                        .replace("{{expiryMinutes}}", "5");
+
+
+                helper.setText(htmlTemplate, true);
+            }
+            File logoFile = new File("src/main/resources/static/images/emblem.png"); // path to your logo
+            helper.addInline("companyLogo", logoFile);
+
+            mailSender.send(message);
+            return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "SUCCESS TO PROCESS", code, null, false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "FAILED TO PROCESS", null, null, false);
+        }
+    }
+
+
+    public ResponseEntity<?> verifyOtpCode(DataSubjectOperationsRequestDto requestDto){
+        try{
+            return !requestDto.getOtpCode().equals(dataSubjectRepository.findDataSubjectByIdAndActiveStatus(Integer.parseInt(requestDto.getDsCode()), Constants.ACTIVE).getOtpCode()) ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "OTP CODE MISMATCH", null, null, false) : dataSubjectRepository.updateTheOtpCodeColumnIfUserVerificationIsFalse("", Integer.parseInt(requestDto.getDsCode()), Constants.ACTIVE) == 0 ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "VERIFICATION PROCEDURE FAILED", null, null, false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "OTP VERIFIED SUCCESSFULLY", null, null, false);
+        }catch (Exception e){
+            e.printStackTrace();
+            return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "FAILED TO PROCESS", null, null, false);
+        }
+    }
 
 }

@@ -19,7 +19,6 @@ public class DataControllerOperationsRequestDto {
     private int mapId;
     @JsonProperty("status")
     private String status;
-
     @JsonProperty("username")
     private String username;
     @JsonProperty("password")
