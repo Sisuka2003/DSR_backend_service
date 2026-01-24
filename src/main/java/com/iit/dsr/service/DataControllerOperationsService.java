@@ -100,7 +100,7 @@ public class DataControllerOperationsService {
     public ResponseEntity<?> rejectDataSubjectDataModificationOrDeletionRequest(DataControllerOperationsRequestDto requestDto){
         try {
             log.info("DataControllerOperationsService => rejectDataSubjectDataModificationOrDeletionRequest() => invoked with "+requestDto);
-            return dataSubjectInControllerRepository.rejectDataSubjectDataModificationOrDeletionRequest(statusRepository.getStatusRecordFromCode(Constants.REJECTED).getId(), Integer.parseInt(requestDto.getDsCode()), Integer.parseInt(requestDto.getDcCode()), Integer.parseInt(requestDto.getStatus())) > 0 ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA CORRECTION SUCCESS", null,null,false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "DATA CORRECTION FAILED", null,null,false);
+            return dataSubjectInControllerRepository.rejectDataSubjectDataModificationOrDeletionRequest(statusRepository.getStatusRecordFromCode(Constants.REJECTED).getId(),statusRepository.getStatusRecordFromCode(Constants.SKIPPED).getId(), Integer.parseInt(requestDto.getDsCode()), Integer.parseInt(requestDto.getDcCode()), Integer.parseInt(requestDto.getStatus())) > 0 ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA CORRECTION SUCCESS", null,null,false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "DATA CORRECTION FAILED", null,null,false);
         }catch (Exception e){
             log.info("DataControllerOperationsService => rejectDataSubjectDataModificationOrDeletionRequest() => Failed To Process");
             e.printStackTrace();

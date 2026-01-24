@@ -75,15 +75,31 @@ public class DataSubjectOperationsService {
         try {
             log.info("DataSubjectOperationsService => updatedStoredData() => invoked with "+requestDto);
 
-            if(requestDto.isIsControllerApproved()){
-                return dataSubjectInControllerRepository.updateDataSubjectDataOnApproval(requestDto.getCollectedData(),statusRepository.getStatusRecordFromCode(Constants.APPROVED).getId(), Integer.parseInt(requestDto.getDsCode()), Integer.parseInt(requestDto.getDcCode()), Integer.parseInt(requestDto.getStatus())) > 0 ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA CORRECTION SUCCESS", null,null,false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "DATA CORRECTION FAILED", null,null,false);
-            }
-            if(!dataSubjectInControllerRepository.checkForPendingRequestsByDataSubject(Integer.parseInt(requestDto.getDsCode()), Integer.parseInt(requestDto.getDcCode()), Constants.PENDING, Constants.QUEUED).isEmpty()){
-                return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "PENDING REQUESTS EXISTS", null,null,false);
+            if(requestDto.isAnAdmin()){
+                log.info("DataSubjectOperationsService => updatedStoredData() => Is an admin");
+                DataSubjectInOrganizationEntity dataSubjectInOrganizationEntity = dataSubjectInControllerRepository.findById(Integer.parseInt(requestDto.getRecordId())).orElse(null);
+
+                if(Objects.isNull(dataSubjectInOrganizationEntity)){
+                    log.info("DataSubjectOperationsService => updatedStoredData() => Data empty");
+                    return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_EMPTY, "NO SUCH RECORD", null,null,false);
+                }
+
+                if(dataSubjectInOrganizationEntity.getActivityStatus().getCode().equals(Constants.REJECTED) || dataSubjectInOrganizationEntity.getActivityStatus().getCode().equals(Constants.QUEUED) ||
+                        dataSubjectInOrganizationEntity.getSubjectActivityStatus().getCode().equals(Constants.CANCELLED)){
+
+                    log.info("DataSubjectOperationsService => updatedStoredData() => a;ready cancelled / rejected");
+                    return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "UNABLE TO PROCEED DUE TO AGENT / SUBJECT MODIFICATION", null,null,false);
+                }
+
+                log.info("DataSubjectOperationsService => updatedStoredData => controller requesting to accept or reject request");
+                return dataSubjectInOrganizationEntity.getActivityStatus().getCode().equals(Constants.APPROVED) || dataSubjectInOrganizationEntity.getActivityStatus().getCode().equals(Constants.REJECTED) ?
+                        dataSubjectInControllerRepository.updateDataSubjectDataOnApproval(requestDto.getCollectedData(),statusRepository.getStatusRecordFromCode(Constants.APPROVED).getId(), Integer.parseInt(requestDto.getRecordId()), Integer.parseInt(requestDto.getStatus())) > 0 ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA CORRECTION SUCCESS", null,null,false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "DATA CORRECTION FAILED", null,null,false)
+                :
+                        dataSubjectInControllerRepository.updateDataSubjectDataOnApprovalSkipped(requestDto.getCollectedData(),statusRepository.getStatusRecordFromCode(Constants.APPROVED).getId(),statusRepository.getStatusRecordFromCode(Constants.SKIPPED).getId(), Integer.parseInt(requestDto.getRecordId()), Integer.parseInt(requestDto.getStatus())) > 0 ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA CORRECTION SUCCESS", null,null,false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "DATA CORRECTION FAILED", null,null,false);
             }
             return dataSubjectInControllerRepository.updateCollectedDataOfDataSubject(requestDto.getCollectedData(), Integer.parseInt(requestDto.getDsCode()), Integer.parseInt(requestDto.getDcCode()), Integer.parseInt(requestDto.getStatus())) > 0 ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA CORRECTION SUCCESS", null,null,false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "DATA CORRECTION FAILED", null,null,false);
         }catch (Exception e){
-            log.info("updatedStoredData => Failed To Process");
+            log.info("DataSubjectOperationsService => updatedStoredData => Failed To Process");
             e.printStackTrace();
             return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "FAILED TO PROCESS", null,null,false);
 

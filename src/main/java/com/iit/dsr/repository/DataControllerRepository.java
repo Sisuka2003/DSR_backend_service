@@ -27,6 +27,7 @@ public interface DataControllerRepository extends JpaRepository<DataControllerEn
     @Modifying
     @Query("UPDATE DataControllerEntity DCE SET DCE.orgStatus.id=?2 WHERE DCE.id =?1")
     int deleteControllerRecord(Integer dcCode, Integer StatusCode);
+
     @Modifying
     @Query("UPDATE DataControllerEntity DCE SET DCE.orgUsername = ?1, DCE.orgPassword = ?2  WHERE DCE.id = ?3 AND DCE.orgStatus.code=?4")
     int updateDataController(String username, String password, Integer dcCode,String statusCode);

@@ -27,4 +27,8 @@ public class DataSubjectOperationsRequestDto {
     private String recipientEmail;
     @JsonProperty("otpCode")
     private String otpCode;
+    @JsonProperty("isAnAdmin")
+    private boolean isAnAdmin;
+    @JsonProperty("recordId")
+    private String recordId;
 }

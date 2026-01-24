@@ -45,4 +45,13 @@ public class DataSubjectInOrganizationEntity {
 
     @Column(name = "backuped_data", nullable = false)
     private String backupData;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "admin_activity_status", referencedColumnName = "id")
+    private StatusEntity adminActivityStatus;
+
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "subject_activity_status", referencedColumnName = "id")
+    private StatusEntity subjectActivityStatus;
 }
