@@ -44,8 +44,8 @@ public interface DataSubjectInControllerRepository extends JpaRepository<DataSub
     @Query("SELECT DSIO FROM DataSubjectInOrganizationEntity DSIO WHERE DSIO.dcCode.id = ?1 AND DSIO.status.code = ?2 AND DSIO.subjectActivityStatus.id != 5")
     List<DataSubjectInOrganizationEntity> getCustomerRecordFromOrganizationMapped(int dcCode, String statusCode);
 
-    @Query("SELECT DSIO FROM DataSubjectInOrganizationEntity DSIO WHERE DSIO.dsCode.id = ?1 AND DSIO.status.code = ?2")
-    List<DataSubjectInOrganizationEntity> getCustomerRecordFromCustomerMapped(int dsCode, String statusCode);
+    @Query("SELECT DSIO FROM DataSubjectInOrganizationEntity DSIO WHERE DSIO.dsCode.id = ?1 AND DSIO.dcCode.id=?2 AND DSIO.status.code = ?3")
+    List<DataSubjectInOrganizationEntity> getCustomerRecordFromCustomerMapped(int dsCode, int dcCode, String statusCode);
 
     @Query("SELECT DSIO FROM DataSubjectInOrganizationEntity DSIO WHERE DSIO.dsCode.id = ?1 AND DSIO.dcCode.id = ?2 AND (DSIO.activityStatus.code = ?3 OR DSIO.activityStatus.code = ?4) ")
     DataSubjectInOrganizationEntity checkForPendingRequestsByDataSubject(int dsCode, int dcCode, String pendingStatusCode, String queuedStatusCode);

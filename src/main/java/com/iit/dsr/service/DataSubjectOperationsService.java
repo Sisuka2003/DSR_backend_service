@@ -84,10 +84,11 @@ public class DataSubjectOperationsService {
                     return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_EMPTY, "NO SUCH RECORD", null,null,false);
                 }
 
-                if(dataSubjectInOrganizationEntity.getActivityStatus().getCode().equals(Constants.REJECTED) || dataSubjectInOrganizationEntity.getActivityStatus().getCode().equals(Constants.QUEUED) ||
-                        dataSubjectInOrganizationEntity.getSubjectActivityStatus().getCode().equals(Constants.CANCELLED)){
+                if(dataSubjectInOrganizationEntity.getActivityStatus().getCode().equals(Constants.REJECTED) ||
+                        dataSubjectInOrganizationEntity.getActivityStatus().getCode().equals(Constants.QUEUED) ||
+                        dataSubjectInOrganizationEntity.getSubjectActivityStatus().getCode().equals(Constants.REJECTED)){
 
-                    log.info("DataSubjectOperationsService => updatedStoredData() => a;ready cancelled / rejected");
+                    log.info("DataSubjectOperationsService => updatedStoredData() => already cancelled / rejected");
                     return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "UNABLE TO PROCEED DUE TO AGENT / SUBJECT MODIFICATION", null,null,false);
                 }
 
@@ -97,6 +98,14 @@ public class DataSubjectOperationsService {
                 :
                         dataSubjectInControllerRepository.updateDataSubjectDataOnApprovalSkipped(requestDto.getCollectedData(),statusRepository.getStatusRecordFromCode(Constants.APPROVED).getId(),statusRepository.getStatusRecordFromCode(Constants.SKIPPED).getId(), Integer.parseInt(requestDto.getRecordId()), Integer.parseInt(requestDto.getStatus())) > 0 ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA CORRECTION SUCCESS", null,null,false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "DATA CORRECTION FAILED", null,null,false);
             }
+
+            DataSubjectInOrganizationEntity dataSubjectInOrganizationEntity = dataSubjectInControllerRepository.checkForPendingRequestsByDataSubject(Integer.parseInt(requestDto.getDsCode()), Integer.parseInt(requestDto.getDcCode()), Constants.PENDING, Constants.QUEUED);
+
+            if(Objects.nonNull(dataSubjectInOrganizationEntity)){
+                log.info("DataSubjectOperationsService => updatedStoredData() => Pending Record Exists please cancel it to proceed");
+                return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "PENDING RECORD EXISTS", null,null,false);
+            }
+
             return dataSubjectInControllerRepository.updateCollectedDataOfDataSubject(requestDto.getCollectedData(), Integer.parseInt(requestDto.getDsCode()), Integer.parseInt(requestDto.getDcCode()), Integer.parseInt(requestDto.getStatus())) > 0 ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA CORRECTION SUCCESS", null,null,false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "DATA CORRECTION FAILED", null,null,false);
         }catch (Exception e){
             log.info("DataSubjectOperationsService => updatedStoredData => Failed To Process");
@@ -311,7 +320,7 @@ public class DataSubjectOperationsService {
     public ResponseEntity<?> requestDataSubjectRelatedDataFromOrganization(DataSubjectOperationsRequestDto requestDto) {
         try{
             log.info("DataSubjectOperationsService => requestDataSubjectRelatedDataFromOrganization() => invoked with "+requestDto);
-            List<DataSubjectInOrganizationEntity> customerRecordFromOrganization = dataSubjectInControllerRepository.getCustomerRecordFromCustomerMapped(Integer.parseInt(requestDto.getDsCode()), Constants.ACTIVE);
+            List<DataSubjectInOrganizationEntity> customerRecordFromOrganization = dataSubjectInControllerRepository.getCustomerRecordFromCustomerMapped(Integer.parseInt(requestDto.getDsCode()), Integer.parseInt(requestDto.getDsCode()), Constants.ACTIVE);
             return Objects.isNull(customerRecordFromOrganization) ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_EMPTY, "NO DATA EXISTS", null,null,false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA FETCHED SUCCESSFULLY", customerRecordFromOrganization,null,false);
         }catch (Exception e){
             log.info("DataSubjectOperationsService => requestDataSubjectRelatedDataFromOrganization() => Failed To process");
