@@ -52,4 +52,10 @@ public class DataSubjectOperationsController {
     public ResponseEntity<?> verifyLoginOTP(@RequestBody DataSubjectOperationsRequestDto requestDto){
         return dataSubjectOperationsService.verifyOtpCode(requestDto);
     }
+
+
+    @PostMapping(value = "/requestDataSubjectRelatedDataFromOrganization")
+    public ResponseEntity<?> requestDataSubjectRelatedDataFromOrganization(@RequestBody DataSubjectOperationsRequestDto requestDto){
+        return dataSubjectOperationsService.requestDataSubjectRelatedDataFromOrganization(requestDto);
+    }
 }

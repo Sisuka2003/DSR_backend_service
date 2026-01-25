@@ -30,6 +30,10 @@ public interface DataSubjectInControllerRepository extends JpaRepository<DataSub
     int updateDataSubjectDataOnApproval(String collectedData, Integer approvedStatus, Integer dsioId, Integer statusCode);
 
     @Modifying
+    @Query("UPDATE DataSubjectInOrganizationEntity DSIO SET DSIO.collectedData = DSIO.backupData, DSIO.backupData ='', DSIO.adminActivityStatus.id = ?1, DSIO.activityStatus.id =?2,DSIO.subjectActivityStatus.id =?3 WHERE DSIO.dsCode.id =?4 AND DSIO.dcCode.id =?5 AND DSIO.status.id =?6")
+    int rejectDataSubjectDataModificationOrDeletionRequestForUserOnly(Integer skippedAdminCode, Integer skippedAgentCode, Integer rejectedUserCode, Integer dsCode, Integer dcCode, Integer statusCode);
+
+    @Modifying
     @Query("UPDATE DataSubjectInOrganizationEntity DSIO SET DSIO.collectedData = DSIO.backupData, DSIO.backupData ='', DSIO.adminActivityStatus.id = ?1, DSIO.activityStatus.id =?2 WHERE DSIO.dsCode.id =?3 AND DSIO.dcCode.id =?4 AND DSIO.status.id =?5")
     int rejectDataSubjectDataModificationOrDeletionRequest(Integer rejectedCode, Integer skippedCode, Integer dsCode, Integer dcCode, Integer statusCode);
 
@@ -37,8 +41,11 @@ public interface DataSubjectInControllerRepository extends JpaRepository<DataSub
     @Query("UPDATE DataSubjectInOrganizationEntity DSIO SET DSIO.status.id = ?3 WHERE DSIO.dsCode.id =?1 AND DSIO.dcCode.id =?2")
     int deleteCollectedDataOfDataSubject(Integer dsCode, Integer dcCode, Integer statusCode);
 
-    @Query("SELECT DSIO FROM DataSubjectInOrganizationEntity DSIO WHERE DSIO.dcCode.id = ?1 AND DSIO.status.code = ?2")
+    @Query("SELECT DSIO FROM DataSubjectInOrganizationEntity DSIO WHERE DSIO.dcCode.id = ?1 AND DSIO.status.code = ?2 AND DSIO.subjectActivityStatus.id != 5")
     List<DataSubjectInOrganizationEntity> getCustomerRecordFromOrganizationMapped(int dcCode, String statusCode);
+
+    @Query("SELECT DSIO FROM DataSubjectInOrganizationEntity DSIO WHERE DSIO.dsCode.id = ?1 AND DSIO.status.code = ?2")
+    List<DataSubjectInOrganizationEntity> getCustomerRecordFromCustomerMapped(int dsCode, String statusCode);
 
     @Query("SELECT DSIO FROM DataSubjectInOrganizationEntity DSIO WHERE DSIO.dsCode.id = ?1 AND DSIO.dcCode.id = ?2 AND (DSIO.activityStatus.code = ?3 OR DSIO.activityStatus.code = ?4) ")
     DataSubjectInOrganizationEntity checkForPendingRequestsByDataSubject(int dsCode, int dcCode, String pendingStatusCode, String queuedStatusCode);

@@ -308,4 +308,15 @@ public class DataSubjectOperationsService {
         }
     }
 
+    public ResponseEntity<?> requestDataSubjectRelatedDataFromOrganization(DataSubjectOperationsRequestDto requestDto) {
+        try{
+            log.info("DataSubjectOperationsService => requestDataSubjectRelatedDataFromOrganization() => invoked with "+requestDto);
+            List<DataSubjectInOrganizationEntity> customerRecordFromOrganization = dataSubjectInControllerRepository.getCustomerRecordFromCustomerMapped(Integer.parseInt(requestDto.getDsCode()), Constants.ACTIVE);
+            return Objects.isNull(customerRecordFromOrganization) ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_EMPTY, "NO DATA EXISTS", null,null,false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA FETCHED SUCCESSFULLY", customerRecordFromOrganization,null,false);
+        }catch (Exception e){
+            log.info("DataSubjectOperationsService => requestDataSubjectRelatedDataFromOrganization() => Failed To process");
+            e.printStackTrace();
+            return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "FAILED TO PROCESS", null, null, false);
+        }
+    }
 }

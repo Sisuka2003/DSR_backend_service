@@ -23,4 +23,6 @@ public class DataControllerOperationsRequestDto {
     private String username;
     @JsonProperty("password")
     private String password;
+    @JsonProperty("isUserProfile")
+    private Boolean isUserProfile;
 }
