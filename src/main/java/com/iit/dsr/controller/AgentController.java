@@ -1,7 +1,7 @@
 package com.iit.dsr.controller;
 
 
-import com.iit.dsr.dto.requests.admin.AgentRequestDto;
+import com.iit.dsr.dto.requests.agent.AgentRequestDto;
 import com.iit.dsr.service.AgentOperationsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

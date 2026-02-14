@@ -48,4 +48,10 @@ public class DataOrganizationOperationsController {
         return dataControllerOperationsService.rejectDataSubjectDataModificationOrDeletionRequest(requestDto);
     }
 
+    @PostMapping(value ="/addNewDataController")
+    public ResponseEntity<?> addNewDataController(@RequestBody DataControllerOperationsRequestDto requestDto){
+        log.info("DataOrganizationOperationsController => addNewDataController => invoked with"+requestDto);
+        return dataControllerOperationsService.addNewDataControllerRequestDto(requestDto);
+    }
+
 }

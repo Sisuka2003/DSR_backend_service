@@ -28,4 +28,9 @@ public interface DataSubjectRepository extends JpaRepository<DataSubjectsEntity,
 
     @Query("SELECT DSE FROM DataSubjectsEntity DSE WHERE DSE.id=?1 AND DSE.status.code=?2")
     DataSubjectsEntity findDataSubjectByIdAndActiveStatus(Integer dsCode, String statusCode);
+
+    @Query("SELECT COUNT(DS.id) FROM DataSubjectsEntity DS WHERE DS.status.code=?1")
+    int getAllActiveDataSubjectCount(String status);
+
+
 }

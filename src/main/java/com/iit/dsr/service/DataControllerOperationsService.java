@@ -9,6 +9,7 @@ import com.iit.dsr.entity.DataSubjectInOrganizationEntity;
 import com.iit.dsr.entity.StatusEntity;
 import com.iit.dsr.repository.DataControllerRepository;
 import com.iit.dsr.repository.DataSubjectInControllerRepository;
+import com.iit.dsr.repository.KeyIdenticationKeyRepository;
 import com.iit.dsr.repository.StatusRepository;
 import com.iit.dsr.utils.CommonUtils;
 import com.iit.dsr.utils.Constants;
@@ -26,6 +27,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.awt.*;
 import java.io.ByteArrayOutputStream;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +47,9 @@ public class DataControllerOperationsService {
 
     @Autowired
     private DataSubjectInControllerRepository dataSubjectInControllerRepository;
+
+    @Autowired
+    private KeyIdenticationKeyRepository keyIdenticationKeyRepository;
 
     @Autowired
     private StatusRepository statusRepository;
@@ -106,6 +112,31 @@ public class DataControllerOperationsService {
             return dataSubjectInControllerRepository.rejectDataSubjectDataModificationOrDeletionRequest(statusRepository.getStatusRecordFromCode(Constants.REJECTED).getId(),statusRepository.getStatusRecordFromCode(Constants.SKIPPED).getId(), Integer.parseInt(requestDto.getDsCode()), Integer.parseInt(requestDto.getDcCode()), Integer.parseInt(requestDto.getStatus())) > 0 ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA CORRECTION SUCCESS", null,null,false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "DATA CORRECTION FAILED", null,null,false);
         }catch (Exception e){
             log.info("DataControllerOperationsService => rejectDataSubjectDataModificationOrDeletionRequest() => Failed To Process");
+            e.printStackTrace();
+            return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "FAILED TO PROCESS", null,null,false);
+        }
+    }
+
+    public ResponseEntity<?> addNewDataControllerRequestDto(DataControllerOperationsRequestDto requestDto) {
+        try {
+            log.info("DataControllerOperationsService => addnewDataControllerRequestDto() => invoked with "+requestDto);
+            String currentTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
+            DataControllerEntity dce =new DataControllerEntity();
+            dce.setOrgName(requestDto.getOrgName());
+            dce.setOrgStatus(statusRepository.getStatusRecordFromCode(Constants.ACTIVE));
+            dce.setAgents(Integer.parseInt(requestDto.getAgentCount()));
+            dce.setNotifications(0);
+            dce.setLastUpdatedTime(currentTime);
+            dce.setCreatedTime(currentTime);
+            dce.setIdentificationKey(keyIdenticationKeyRepository.findById(Integer.parseInt(requestDto.getIdKey())).orElse(null));
+            dce.setOrgUsername(requestDto.getUsername());
+            dce.setOrgPassword(requestDto.getPassword());
+
+            dataControllerRepository.save(dce);
+            return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "SUCCESSFULLY SAVED", null,null,false);
+        }catch (Exception e){
+            log.info("DataControllerOperationsService => addnewDataControllerRequestDto() => Failed To Process");
             e.printStackTrace();
             return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "FAILED TO PROCESS", null,null,false);
         }

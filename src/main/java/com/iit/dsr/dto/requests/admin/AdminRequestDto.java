@@ -7,22 +7,20 @@ import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Data
-@Component
 @AllArgsConstructor
 @NoArgsConstructor
-public class AgentRequestDto {
-    @JsonProperty(value = "orgUsername")
+@Component
+public class AdminRequestDto {
+    @JsonProperty(value = "adminUsername")
     private String username;
-    @JsonProperty(value = "orgPassword")
+    @JsonProperty(value = "adminPassword")
     private String password;
     @JsonProperty(value = "status")
     private Integer status;
-    @JsonProperty(value = "userRole")
-    private Integer userRole;
-    @JsonProperty(value = "notifications")
-    private Integer notifications;
-    @JsonProperty(value = "agentId")
-    private Integer agentId;
-
-
+    @JsonProperty(value = "adminFname")
+    private String fname;
+    @JsonProperty(value = "adminLname")
+    private String lname;
+    @JsonProperty(value = "adminId")
+    private Integer id;
 }

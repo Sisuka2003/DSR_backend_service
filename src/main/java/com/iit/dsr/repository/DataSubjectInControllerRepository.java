@@ -49,4 +49,20 @@ public interface DataSubjectInControllerRepository extends JpaRepository<DataSub
 
     @Query("SELECT DSIO FROM DataSubjectInOrganizationEntity DSIO WHERE DSIO.dsCode.id = ?1 AND DSIO.dcCode.id = ?2 AND (DSIO.activityStatus.code = ?3 OR DSIO.activityStatus.code = ?4) ")
     DataSubjectInOrganizationEntity checkForPendingRequestsByDataSubject(int dsCode, int dcCode, String pendingStatusCode, String queuedStatusCode);
+
+    @Query("SELECT COUNT(DSIO.id) FROM DataSubjectInOrganizationEntity DSIO WHERE DSIO.status.code =?1")
+    int getAllRecordsCount(String statusCode);
+
+
+    @Query("SELECT COUNT(DSIO.id) FROM DataSubjectInOrganizationEntity DSIO WHERE DSIO.adminActivityStatus.code =?1")
+    int getAllPendingRecordsCount(String statusCode);
+
+    @Query("SELECT COUNT(DSIO.id) FROM DataSubjectInOrganizationEntity DSIO WHERE DSIO.adminActivityStatus.code =?1")
+    int getAllApprovedRecordsCount(String statusCode);
+
+    @Query("SELECT COUNT(DSIO.id) FROM DataSubjectInOrganizationEntity DSIO WHERE DSIO.adminActivityStatus.code =?1")
+    int getAllRejectedRecordsCount(String statusCode);
+
+    @Query("SELECT COUNT(DSIO.id) FROM DataSubjectInOrganizationEntity DSIO WHERE DSIO.adminActivityStatus.code =?1")
+    int getAllQueuedRecordsCount(String statusCode);
 }

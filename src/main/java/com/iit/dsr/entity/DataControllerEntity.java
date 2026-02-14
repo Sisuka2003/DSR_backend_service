@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "data_controller_org")
@@ -26,10 +27,10 @@ public class DataControllerEntity {
     private StatusEntity orgStatus;
 
     @Column(name = "created_time", nullable = false)
-    private Timestamp createdTime;
+    private String createdTime;
 
     @Column(name = "last_updated_time", nullable = false)
-    private Timestamp lastUpdatedTime;
+    private String lastUpdatedTime;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "key_identification", referencedColumnName = "id")
@@ -43,4 +44,7 @@ public class DataControllerEntity {
 
     @Column(name = "notifications", nullable = false)
     private int notifications;
+
+    @Column(name = "agents", nullable = false)
+    private int agents;
 }
