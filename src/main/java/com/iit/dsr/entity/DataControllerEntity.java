@@ -46,5 +46,5 @@ public class DataControllerEntity {
     private int notifications;
 
     @Column(name = "agents", nullable = false)
-    private int agents;
+    private Integer agents;
 }

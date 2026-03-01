@@ -38,4 +38,10 @@ public class DataControllerOperationsRequestDto {
     @JsonProperty("agentCount")
     private String agentCount;
 
+
+    @JsonProperty("agentCode")
+    private String agentCode;
+    @JsonProperty("isAgentAlert")
+    private Boolean isAgentAlert;
+
 }

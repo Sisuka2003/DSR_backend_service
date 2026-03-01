@@ -43,10 +43,10 @@ public class AgentOperationsService {
                 return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_EMPTY,"NO SUCH AGENT EXISTS",null,null,false);
             }
 
-//            if(dataControllerAgentAvailability.getIsLoggedIn() == 1){
-//                log.info("AgentOperationsService => loginControllerAgent() => agent already logged in ");
-//                return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED,"AGENT ALREADY LOGGED",null,null,false);
-//            }
+            if(dataControllerAgentAvailability.getIsLoggedIn() == 1){
+                log.info("AgentOperationsService => loginControllerAgent() => agent already logged in ");
+                return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED,"AGENT ALREADY LOGGED",null,null,false);
+            }
 
             log.info("AgentOperationsService =>  loginControllerAgent() => validations are passed");
            return agentsRepository.updateAdminsLoggedStatusToTrue(1,dataControllerAgentAvailability.getId()) != 1

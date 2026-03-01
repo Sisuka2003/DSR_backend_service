@@ -54,4 +54,8 @@ public class DataSubjectInOrganizationEntity {
     @ManyToOne(optional = false)
     @JoinColumn(name = "subject_activity_status", referencedColumnName = "id")
     private StatusEntity subjectActivityStatus;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "agent_code", referencedColumnName = "id")
+    private DataControllerAgentsEntity agentCode;
 }

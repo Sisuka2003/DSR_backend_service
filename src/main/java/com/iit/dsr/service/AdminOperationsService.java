@@ -37,21 +37,8 @@ public class AdminOperationsService {
                 return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_EMPTY,"NO SUCH ADMINS EXISTS",null,null,false);
             }
 
-
             log.info("AdminOperationsService =>  getAdminControllerDetails() =>"+adminFromUsernameAndPassword.toString());
-            return commonUtils.generateResponseObject(
-                    Constants.RESPONSE_CODE_SUCCESS,
-                    "ADMIN LOGGED IN SUCCESSFULLY",
-                    new AdminResponseDto(
-                            adminFromUsernameAndPassword.getId(),
-                            adminFromUsernameAndPassword.getUsername(),
-                            adminFromUsernameAndPassword.getPassword(),
-                            adminFromUsernameAndPassword.getStatus().getDescription(),
-                            adminFromUsernameAndPassword.getUserRole().getRole(),
-                            adminFromUsernameAndPassword.getFirstName(),
-                            adminFromUsernameAndPassword.getLastName()),
-                    null,
-                    false);
+            return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "ADMIN LOGGED IN SUCCESSFULLY", new AdminResponseDto(adminFromUsernameAndPassword.getId(),adminFromUsernameAndPassword.getUsername(),adminFromUsernameAndPassword.getPassword(),adminFromUsernameAndPassword.getStatus().getDescription(), adminFromUsernameAndPassword.getUserRole().getRole(),adminFromUsernameAndPassword.getFirstName(),adminFromUsernameAndPassword.getLastName()), null, false);
         }catch (Exception e){
             e.printStackTrace();
             log.info("AdminOperationsService =>  getAdminControllerDetails() => Failed to process");
@@ -97,8 +84,6 @@ public class AdminOperationsService {
 
     public ResponseEntity<?> addNewDataController(AdminRequestDto requestDto){
         try{
-
-
             return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS,"ADDED NEW DATA CONTROLLER",null,null,false);
         }catch (Exception e){
             e.printStackTrace();
