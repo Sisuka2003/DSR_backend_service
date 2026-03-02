@@ -44,4 +44,7 @@ public class DataControllerOperationsRequestDto {
     @JsonProperty("isAgentAlert")
     private Boolean isAgentAlert;
 
+    @JsonProperty("isTaskAssign")
+    private Boolean isTaskAssign;
+
 }

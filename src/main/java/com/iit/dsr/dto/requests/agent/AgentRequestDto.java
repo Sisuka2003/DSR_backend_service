@@ -23,6 +23,9 @@ public class AgentRequestDto {
     private Integer notifications;
     @JsonProperty(value = "agentId")
     private Integer agentId;
-
+    @JsonProperty(value = "recordId")
+    private Integer recordId;
+    @JsonProperty(value = "dcCode")
+    private Integer dcCode;
 
 }

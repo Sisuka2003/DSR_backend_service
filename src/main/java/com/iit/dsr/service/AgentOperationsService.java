@@ -2,6 +2,7 @@ package com.iit.dsr.service;
 
 import com.iit.dsr.dto.requests.agent.AgentRequestDto;
 import com.iit.dsr.entity.DataControllerAgentsEntity;
+import com.iit.dsr.entity.DataSubjectInOrganizationEntity;
 import com.iit.dsr.repository.DataControllerAgentsRepository;
 import com.iit.dsr.repository.DataSubjectInControllerRepository;
 import com.iit.dsr.repository.StatusRepository;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -134,4 +136,56 @@ public class AgentOperationsService {
         }
     }
 
+    public ResponseEntity<?> fetchAllAgentInformation(AgentRequestDto requestDto) {
+        log.info("AgentOperationsService =>  fetchAllAgentInformation() =>"+requestDto);
+        try{
+            List<DataControllerAgentsEntity> dataControllerAgentAvailability = agentsRepository.getAllAgentsFromActiveStatus(requestDto.getDcCode(),Constants.ACTIVE);
+            if(Objects.isNull(dataControllerAgentAvailability)){
+                log.info("AgentOperationsService =>  fetchAllAgentInformation() => no agent exists");
+                return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_EMPTY,"NO SUCH AGENT EXISTS",null,null,false);
+            }
+
+            log.info("AgentOperationsService =>  fetchAllAgentInformation() => validations are passed");
+            return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS,"AGENTS RETRIEVED SUCCESSFULLY",dataControllerAgentAvailability,null,false);
+
+        }catch (Exception e){
+            log.info("AgentOperationsService =>  fetchAllAgentInformation() => Failed to process");
+            e.printStackTrace();
+            return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED,"FAILED TO PROCESS",null,null,false);
+        }
+    }
+
+    public ResponseEntity<?> assignTaskToAgent(AgentRequestDto requestDto) {
+        log.info("AgentOperationsService =>  assignTaskToAgent() =>"+requestDto);
+        try{
+            DataSubjectInOrganizationEntity dataSubjectInOrganizationEntity = dataSubjectInControllerRepository.findById(requestDto.getRecordId()).orElse(null);
+
+            if(Objects.isNull(dataSubjectInOrganizationEntity)){
+                log.info("AgentOperationsService =>  assignTaskToAgent() => no Such Record exists");
+                return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_EMPTY,"NO SUCH RECORD EXISTS",null,null,false);
+            }
+
+            if(Objects.nonNull(dataSubjectInOrganizationEntity.getAgentCode())){
+                log.info("AgentOperationsService =>  assignTaskToAgent() => Already Assigned");
+                return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS,"Task Already Assigned",null,null,false);
+            }
+
+            DataControllerAgentsEntity dataControllerAgentsEntity = agentsRepository.findById(requestDto.getAgentId()).orElse(null);
+
+            if(Objects.isNull(dataControllerAgentsEntity)){
+                log.info("AgentOperationsService =>  assignTaskToAgent() => no Such Agent exists");
+                return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_EMPTY,"NO SUCH AGENT EXISTS",null,null,false);
+            }
+
+            agentsRepository.updateAgentNotificationCount(requestDto.getAgentId(),Constants.ACTIVE);
+            dataSubjectInControllerRepository.updateAgentCodeForDataSubjectRequestRecord(requestDto.getAgentId(),requestDto.getRecordId(),Constants.ACTIVE);
+
+            return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS,"AGENT ASSIGNED SUCCESSFULLY",null,null,false);
+
+        }catch (Exception e){
+            log.info("AgentOperationsService =>  assignTaskToAgent() => Failed to process");
+            e.printStackTrace();
+            return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED,"FAILED TO PROCESS",null,null,false);
+        }
+    }
 }

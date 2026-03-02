@@ -93,13 +93,26 @@ public class DataControllerOperationsService {
     public ResponseEntity<?> getDataSubjectDataOfController(DataControllerOperationsRequestDto requestDto) {
         try {
             log.info("DataControllerOperationsService => getDataSubjectDataOfController() => invoked with "+requestDto);
-
-
-            List<DataSubjectInOrganizationEntity> customerRecordFromOrganization =
-                    requestDto.getIsAgentAlert() ?
-                            dataSubjectInControllerRepository.getCustomerRecordFromAgentMapped(Integer.parseInt(requestDto.getAgentCode()), Integer.parseInt(requestDto.getDcCode()), Constants.ACTIVE)
-            :
-            dataSubjectInControllerRepository.getCustomerRecordFromOrganizationMapped(Integer.parseInt(requestDto.getDcCode()), Constants.ACTIVE);
+            List<DataSubjectInOrganizationEntity> customerRecordFromOrganization = null;
+            if(!requestDto.getIsTaskAssign()){
+                customerRecordFromOrganization = requestDto.getIsAgentAlert() ?
+                        dataSubjectInControllerRepository.getCustomerRecordFromAgentMapped(Integer.parseInt(requestDto.getAgentCode()), Integer.parseInt(requestDto.getDcCode()), Constants.ACTIVE)
+                        :
+                        dataSubjectInControllerRepository.getCustomerRecordFromOrganizationMapped(Integer.parseInt(requestDto.getDcCode()), Constants.ACTIVE);
+            }else {
+                log.info("Retreiving only the pending records");
+                customerRecordFromOrganization = requestDto.getIsAgentAlert() ?
+                        dataSubjectInControllerRepository.getCustomerRecordFromAgentMappedTask(
+                                Integer.parseInt(requestDto.getAgentCode()),
+                                Integer.parseInt(requestDto.getDcCode()),
+                                Constants.ACTIVE,
+                                Constants.PENDING)
+                        :
+                        dataSubjectInControllerRepository.getCustomerRecordFromOrganizationMappedTask(
+                                Integer.parseInt(requestDto.getDcCode()),
+                                Constants.ACTIVE,
+                                Constants.PENDING);
+            }
             return Objects.isNull(customerRecordFromOrganization) ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_EMPTY, "NO DATA EXISTS", null,null,false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA FETCHED SUCCESSFULLY", customerRecordFromOrganization,null,false);
         }catch (Exception e){
             log.info("DataControllerOperationsService => getDataSubjectDataOfController() => Failed To Process");

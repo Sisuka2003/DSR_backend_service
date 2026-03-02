@@ -35,4 +35,13 @@ public class AgentController {
     ResponseEntity<?> getAgentData(@RequestBody AgentRequestDto requestDto){
        return agentOperationsService.getAgentData(requestDto);
     }
+    @PostMapping(value = "/fetchAllAgentInformation")
+    ResponseEntity<?> fetchAllAgentInformation(@RequestBody AgentRequestDto requestDto){
+       return agentOperationsService.fetchAllAgentInformation(requestDto);
+    }
+
+    @PostMapping(value = "/assignTaskToAgent")
+    ResponseEntity<?> assignTaskToAgent(@RequestBody AgentRequestDto requestDto){
+       return agentOperationsService.assignTaskToAgent(requestDto);
+    }
 }

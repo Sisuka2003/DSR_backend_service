@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
 
@@ -30,9 +32,11 @@ public class DataSubjectInOrganizationEntity {
     @JoinColumn(name = "dc_code", referencedColumnName = "id")
     private DataControllerEntity dcCode;
 
+    @CreationTimestamp
     @Column(name = "created_time", nullable = false)
     private Timestamp createdTime;
 
+    @UpdateTimestamp
     @Column(name = "last_updated_time", nullable = false)
     private Timestamp lastUpdatedTime;
 
@@ -55,7 +59,7 @@ public class DataSubjectInOrganizationEntity {
     @JoinColumn(name = "subject_activity_status", referencedColumnName = "id")
     private StatusEntity subjectActivityStatus;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = true)
     @JoinColumn(name = "agent_code", referencedColumnName = "id")
     private DataControllerAgentsEntity agentCode;
 }

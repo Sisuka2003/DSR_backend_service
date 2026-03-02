@@ -12,4 +12,7 @@ public class DataControllerLoginRequestDTO {
     @JsonProperty("orgPassword")
     private String orgPassword;
 
+    @JsonProperty("notificationCountRetrieval")
+    private boolean notificationCountRetrieval;
+
 }

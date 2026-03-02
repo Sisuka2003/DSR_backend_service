@@ -36,4 +36,7 @@ public interface DataControllerRepository extends JpaRepository<DataControllerEn
     @Query("SELECT COUNT(DCE.id) FROM DataControllerEntity DCE WHERE DCE.orgStatus.code =?1")
     int getAllActiveDataControllerCount(String statusCode);
 
+    @Modifying
+    @Query("UPDATE DataControllerEntity DCE SET DCE.notifications = (SELECT COUNT(DCIO.id) FROM DataSubjectInOrganizationEntity DCIO WHERE DCIO.dcCode.id =?1 AND DCIO.status.code=?2) WHERE DCE.id = ?3 AND DCE.orgStatus.code=?4 ")
+    int updateAvailableRecordsForOrganization(Integer dcCode1, String active1,Integer dcCode2, String active2);
 }

@@ -6,8 +6,8 @@ import com.iit.dsr.controller.DataSubjectOperationsController;
 import com.iit.dsr.dto.requests.login.DataSubjectLoginRequestDTO;
 import com.iit.dsr.dto.requests.operations.DataSubjectOperationsRequestDto;
 import com.iit.dsr.dto.responses.commons.CommonResponseDTO;
-import com.iit.dsr.entity.DataSubjectInOrganizationEntity;
-import com.iit.dsr.entity.DataSubjectsEntity;
+import com.iit.dsr.entity.*;
+import com.iit.dsr.repository.DataControllerRepository;
 import com.iit.dsr.repository.DataSubjectInControllerRepository;
 import com.iit.dsr.repository.DataSubjectRepository;
 import com.iit.dsr.repository.StatusRepository;
@@ -21,6 +21,9 @@ import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.persistence.Column;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +37,7 @@ import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.List;
 
@@ -51,6 +55,8 @@ public class DataSubjectOperationsService {
     @Autowired
     private DataSubjectRepository dataSubjectRepository;
     @Autowired
+    private DataControllerRepository dataControllerRepository;
+    @Autowired
     private StatusRepository statusRepository;
 
     @Autowired
@@ -60,7 +66,7 @@ public class DataSubjectOperationsService {
     public ResponseEntity<?> getStoredData(DataSubjectOperationsRequestDto requestDto) {
         try {
             log.info("DataSubjectOperationsService => getStoredData() => invoked with "+requestDto);
-            DataSubjectInOrganizationEntity customerRecordFromOrganization = dataSubjectInControllerRepository.getCustomerRecordFromOrganization(Integer.parseInt(requestDto.getDsCode()), Integer.parseInt(requestDto.getDcCode()), Constants.ACTIVE);
+            DataSubjectInOrganizationEntity customerRecordFromOrganization = dataSubjectInControllerRepository.getCustomerRecordFromOrganization(Integer.parseInt(requestDto.getDsCode()), Integer.parseInt(requestDto.getDcCode()), Constants.ACTIVE, Constants.APPROVED,Constants.APPROVED);
             return Objects.isNull(customerRecordFromOrganization) ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_EMPTY, "NO DATA EXISTS", null,null,false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA FETCHED SUCCESSFULLY", customerRecordFromOrganization,null,false);
         }catch (Exception e){
             log.info("getStoredData => Failed To Process");
@@ -99,14 +105,36 @@ public class DataSubjectOperationsService {
                         dataSubjectInControllerRepository.updateDataSubjectDataOnApprovalSkipped(requestDto.getCollectedData(),statusRepository.getStatusRecordFromCode(Constants.APPROVED).getId(),statusRepository.getStatusRecordFromCode(Constants.SKIPPED).getId(), Integer.parseInt(requestDto.getRecordId()), Integer.parseInt(requestDto.getStatus())) > 0 ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA CORRECTION SUCCESS", null,null,false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "DATA CORRECTION FAILED", null,null,false);
             }
 
-            DataSubjectInOrganizationEntity dataSubjectInOrganizationEntity = dataSubjectInControllerRepository.checkForPendingRequestsByDataSubject(Integer.parseInt(requestDto.getDsCode()), Integer.parseInt(requestDto.getDcCode()), Constants.PENDING, Constants.QUEUED);
+            DataSubjectInOrganizationEntity pendingRecordsForSubjectInRequestOrg = dataSubjectInControllerRepository.checkForPendingRequestsByDataSubject(Integer.parseInt(requestDto.getDsCode()), Integer.parseInt(requestDto.getDcCode()), Constants.PENDING, Constants.QUEUED);
 
-            if(Objects.nonNull(dataSubjectInOrganizationEntity)){
+            if(Objects.nonNull(pendingRecordsForSubjectInRequestOrg)){
                 log.info("DataSubjectOperationsService => updatedStoredData() => Pending Record Exists please cancel it to proceed");
                 return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "PENDING RECORD EXISTS", null,null,false);
             }
 
-            return dataSubjectInControllerRepository.updateCollectedDataOfDataSubject(requestDto.getCollectedData(), Integer.parseInt(requestDto.getDsCode()), Integer.parseInt(requestDto.getDcCode()), Integer.parseInt(requestDto.getStatus())) > 0 ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA CORRECTION SUCCESS", null,null,false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "DATA CORRECTION FAILED", null,null,false);
+            List<DataSubjectInOrganizationEntity> dataSubjectInOrganizationEntity = dataSubjectInControllerRepository.checkForRequestsByDataSubject(Integer.parseInt(requestDto.getDsCode()), Integer.parseInt(requestDto.getDcCode()), Constants.ACTIVE);
+
+            String collectedData = null;
+            for(DataSubjectInOrganizationEntity record :dataSubjectInOrganizationEntity){
+                if(record.getAdminActivityStatus().getCode().equals(Constants.APPROVED)){
+                    collectedData = record.getCollectedData();
+                }else{
+                    collectedData =null;
+                }
+            }
+
+            DataSubjectInOrganizationEntity dataSubjectInOrganizationEntityForModification = new DataSubjectInOrganizationEntity();
+            dataSubjectInOrganizationEntityForModification.setStatus( statusRepository.getStatusRecordFromCode(Constants.ACTIVE));
+            dataSubjectInOrganizationEntityForModification.setDsCode(dataSubjectRepository.findById(Integer.parseInt(requestDto.getDsCode())).orElse(null));
+            dataSubjectInOrganizationEntityForModification.setDcCode(dataControllerRepository.findById(Integer.parseInt(requestDto.getDcCode())).orElse(null));
+            dataSubjectInOrganizationEntityForModification.setCollectedData(requestDto.getCollectedData());
+            dataSubjectInOrganizationEntityForModification.setActivityStatus(statusRepository.getStatusRecordFromCode(Constants.PENDING));
+            dataSubjectInOrganizationEntityForModification.setBackupData(collectedData == null ? requestDto.getCollectedData() : collectedData);
+            dataSubjectInOrganizationEntityForModification.setAdminActivityStatus(statusRepository.getStatusRecordFromCode(Constants.PENDING));
+            dataSubjectInOrganizationEntityForModification.setSubjectActivityStatus(statusRepository.getStatusRecordFromCode(Constants.PENDING));
+            dataSubjectInControllerRepository.save(dataSubjectInOrganizationEntityForModification);
+
+            return Objects.nonNull(dataSubjectInControllerRepository.save(dataSubjectInOrganizationEntityForModification)) ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA CORRECTION SUCCESS", null,null,false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "DATA CORRECTION FAILED", null,null,false);
         }catch (Exception e){
             log.info("DataSubjectOperationsService => updatedStoredData => Failed To Process");
             e.printStackTrace();
@@ -131,7 +159,7 @@ public class DataSubjectOperationsService {
     public ResponseEntity<?> generateDataExportReport(DataSubjectOperationsRequestDto requestDto) {
         try {
 
-            DataSubjectInOrganizationEntity customerRecordFromOrganization = dataSubjectInControllerRepository.getCustomerRecordFromOrganization(Integer.parseInt(requestDto.getDsCode()), Integer.parseInt(requestDto.getDcCode()), Constants.ACTIVE);
+            DataSubjectInOrganizationEntity customerRecordFromOrganization = dataSubjectInControllerRepository.getCustomerRecordFromOrganization(Integer.parseInt(requestDto.getDsCode()), Integer.parseInt(requestDto.getDcCode()), Constants.ACTIVE, Constants.APPROVED, Constants.APPROVED);
             ObjectMapper objectMapper = new ObjectMapper();
             Map<String, Object> collectedData = objectMapper.readValue(
                     customerRecordFromOrganization.getCollectedData(),

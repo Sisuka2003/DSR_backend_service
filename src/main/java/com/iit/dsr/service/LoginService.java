@@ -71,7 +71,7 @@ public class LoginService {
                 return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_EMPTY, "SUBJECT DOES NOT EXISTS", null,null,false);
             }
 
-            DataSubjectInOrganizationEntity dataSubjectInOrganizationRecord = dataSubjectInControllerRepository.getCustomerRecordFromOrganization(dataSubjectsEntity.getId(),dataControllerId, Constants.ACTIVE);
+            DataSubjectInOrganizationEntity dataSubjectInOrganizationRecord = dataSubjectInControllerRepository.getCustomerRecordFromOrganization(dataSubjectsEntity.getId(),dataControllerId, Constants.ACTIVE, Constants.APPROVED,Constants.APPROVED);
             if(Objects.isNull(dataSubjectInOrganizationRecord)){
                 return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_EMPTY, "SUBJECT DOES NOT EXISTS WITHIN THE ORGANIZATION", null,null,false);
             }
@@ -87,15 +87,19 @@ public class LoginService {
     //Data Controller / organization login service - DSR portal
     public ResponseEntity<?> dataControllerLogin(DataControllerLoginRequestDTO dcLoginDto){
         try{
-            log.info("dataControllerLogin => Invoked");
-            String orgUsername = dcLoginDto.getOrgUsername();
-            String orgPassword = dcLoginDto.getOrgPassword();
+                log.info("dataControllerLogin => Invoked");
+                String orgUsername = dcLoginDto.getOrgUsername();
+                String orgPassword = dcLoginDto.getOrgPassword();
 
-            DataControllerEntity dataControllerEntity = dataControllerRepository.getOrganizationByUsernameAndPassword(orgUsername,orgPassword,Constants.ACTIVE);
+                DataControllerEntity dataControllerEntity = dataControllerRepository.getOrganizationByUsernameAndPassword(orgUsername, orgPassword, Constants.ACTIVE);
 
-            if(Objects.isNull(dataControllerEntity)){
-                log.info("dataControllerLogin => check existence with ID");
-                return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_EMPTY, "SELECTED ORGANIZATION DOES NOT EXIST", null,null,false);
+                if (Objects.isNull(dataControllerEntity)) {
+                    log.info("dataControllerLogin => check existence with ID");
+                    return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_EMPTY, "SELECTED ORGANIZATION DOES NOT EXIST", null, null, false);
+                }
+
+            if(!dcLoginDto.isNotificationCountRetrieval()) {
+                dataControllerRepository.updateAvailableRecordsForOrganization(dataControllerEntity.getId(), Constants.ACTIVE, dataControllerEntity.getId(), Constants.ACTIVE);
             }
 
             log.info("dataControllerLogin => organization exist with username & password");

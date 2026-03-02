@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface DataControllerAgentsRepository extends JpaRepository<DataControllerAgentsEntity,Integer> {
 
@@ -24,4 +26,10 @@ public interface DataControllerAgentsRepository extends JpaRepository<DataContro
     @Query("UPDATE DataControllerAgentsEntity DCAE SET DCAE.status.id=?1,DCAE.isLoggedIn = 0 WHERE DCAE.id=?2")
     int deactivateAgentRecord(Integer deactAgentStatus, Integer agentId);
 
+    @Query("SELECT DCAE FROM DataControllerAgentsEntity DCAE WHERE DCAE.dataController.id =?1 AND DCAE.status.code=?2")
+    List<DataControllerAgentsEntity> getAllAgentsFromActiveStatus(Integer dcCode,String activeStatusCode);
+
+    @Modifying
+    @Query("UPDATE DataControllerAgentsEntity DCAE SET DCAE.notifications = DCAE.notifications + 1 WHERE DCAE.id = ?1 AND DCAE.status.code = ?2")
+    int updateAgentNotificationCount(Integer agentId, String activeStatusCode);
 }
