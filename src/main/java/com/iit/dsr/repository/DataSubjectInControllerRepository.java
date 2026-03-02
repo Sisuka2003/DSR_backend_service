@@ -80,4 +80,7 @@ public interface DataSubjectInControllerRepository extends JpaRepository<DataSub
     @Modifying
     @Query("UPDATE DataSubjectInOrganizationEntity DSIO SET DSIO.agentCode.id = ?1 WHERE DSIO.id =?2 AND DSIO.status.code =?3")
     int updateAgentCodeForDataSubjectRequestRecord(Integer agentCode,Integer recordId, String activeStatusCode);
+
+    @Query("SELECT COUNT(DSIO.id) FROM DataSubjectInOrganizationEntity DSIO WHERE DSIO.agentCode.id=?1 AND DSIO.status.code =?2")
+    int findRecordsForAgentId(Integer agentId, String active);
 }

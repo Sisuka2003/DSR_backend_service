@@ -30,6 +30,6 @@ public interface DataControllerAgentsRepository extends JpaRepository<DataContro
     List<DataControllerAgentsEntity> getAllAgentsFromActiveStatus(Integer dcCode,String activeStatusCode);
 
     @Modifying
-    @Query("UPDATE DataControllerAgentsEntity DCAE SET DCAE.notifications = DCAE.notifications + 1 WHERE DCAE.id = ?1 AND DCAE.status.code = ?2")
-    int updateAgentNotificationCount(Integer agentId, String activeStatusCode);
+    @Query("UPDATE DataControllerAgentsEntity DCAE SET DCAE.notifications = ?1 WHERE DCAE.id = ?2 AND DCAE.status.code = ?3")
+    int updateAgentNotificationCount(Integer count,Integer agentId, String activeStatusCode);
 }
