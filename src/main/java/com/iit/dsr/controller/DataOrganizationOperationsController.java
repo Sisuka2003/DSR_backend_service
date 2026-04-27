@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = "api/v1/operations/datacontroller")
-@CrossOrigin(origins = "http://localhost:3000")
 @Log4j2
 public class DataOrganizationOperationsController {
 

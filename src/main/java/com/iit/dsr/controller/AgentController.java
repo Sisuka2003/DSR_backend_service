@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value = "api/agent/operations")
-@CrossOrigin(origins = "http://localhost:3000")
 public class AgentController {
 
     @Autowired
