@@ -178,8 +178,7 @@ public class AgentOperationsService {
             }
 
 
-            int recordsForAgentId = dataSubjectInControllerRepository.findRecordsForAgentId(requestDto.getAgentId(), Constants.ACTIVE);
-            agentsRepository.updateAgentNotificationCount(++recordsForAgentId,requestDto.getAgentId(),Constants.ACTIVE);
+            agentsRepository.updateAgentNotificationCount(requestDto.getAgentId(),Constants.ACTIVE);
             dataSubjectInControllerRepository.updateAgentCodeForDataSubjectRequestRecord(requestDto.getAgentId(),requestDto.getRecordId(),Constants.ACTIVE);
 
             return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS,"AGENT ASSIGNED SUCCESSFULLY",null,null,false);
