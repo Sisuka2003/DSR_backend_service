@@ -83,4 +83,7 @@ public interface DataSubjectInControllerRepository extends JpaRepository<DataSub
 
     @Query("SELECT COUNT(DSIO.id) FROM DataSubjectInOrganizationEntity DSIO WHERE DSIO.agentCode.id=?1 AND DSIO.status.code =?2")
     int findRecordsForAgentId(Integer agentId, String active);
+
+    @Query("SELECT DSICR FROM DataSubjectInOrganizationEntity DSICR WHERE DSICR.dcCode.id =?1 AND DSICR.activityStatus.code=?2 AND DSICR.status.code=?3")
+    List<DataSubjectInOrganizationEntity> getPendingDSRsFromDataController (Integer dataControllerId, String pendingStatusCode, String activeStatusCode);
 }

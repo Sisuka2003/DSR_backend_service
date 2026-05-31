@@ -1,5 +1,7 @@
 package com.iit.dsr.utils;
 
+import java.time.format.DateTimeFormatter;
+
 public class Constants {
 
     public static final String RESPONSE_CODE_SUCCESS ="00";
@@ -21,4 +23,11 @@ public class Constants {
     public static final String PROFILE ="PROFILE";
     public static final String SERVICEDATA ="SERVICEDATA";
     public static final String CONSENTS ="CONSENTS";
+
+    // ── SLA & severity thresholds ─────────────────────────────────────────────
+    public static final int SLA_DAYS                 = 21;
+    public static final int TENTATIVE_THRESHOLD_DAYS = 14;
+    public static final int URGENT_THRESHOLD_DAYS    = 21;
+
+    public static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd MMM yyyy");
 }

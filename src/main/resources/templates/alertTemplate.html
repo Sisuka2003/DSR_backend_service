@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Pending DSR Notification</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: #eef1f5;
+            font-family: 'DM Sans', Arial, sans-serif;
+            padding: 32px 16px;
+            color: #1a2333;
+        }
+
+        .wrapper { max-width: 680px; margin: 0 auto; }
+
+        .accent-bar {
+            height: 5px;
+            background: linear-gradient(90deg, #1a4fba 0%, #3b82f6 60%, #60a5fa 100%);
+            border-radius: 4px 4px 0 0;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 4px 24px rgba(26,79,186,0.08);
+            overflow: hidden;
+        }
+
+        /* ── HEADER ── */
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 28px 36px 24px;
+            border-bottom: 1px solid #e8ecf2;
+            background: #f8fafd;
+        }
+
+        .header-logo { flex-shrink: 0; width: 56px; height: 56px; }
+        .header-logo img { width: 100%; height: 100%; object-fit: contain; }
+
+        .header-logo-placeholder {
+            width: 56px; height: 56px;
+            background: linear-gradient(135deg, #1a4fba, #3b82f6);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-weight: 700; font-size: 20px; letter-spacing: -1px;
+        }
+
+        .header-text h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 20px; color: #1a2333; line-height: 1.2;
+        }
+        .header-text h2 {
+            font-size: 13px; font-weight: 500; color: #6b7a99; margin-top: 4px; letter-spacing: 0.3px;
+        }
+
+        /* ── ALERT BADGE ── */
+        .alert-badge-wrap { padding: 24px 36px 0; }
+        .alert-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: #fff4e5; border: 1px solid #f6a623;
+            border-radius: 6px; padding: 8px 14px;
+            font-size: 13px; font-weight: 600; color: #b45309;
+        }
+
+        /* ── BODY COPY ── */
+        .body-copy {
+            padding: 20px 36px 0;
+            font-size: 15px; line-height: 1.7; color: #374151;
+        }
+        .body-copy p + p { margin-top: 12px; }
+        .controller-name { font-weight: 600; color: #1a4fba; }
+
+        /* ── DIVIDER ── */
+        .divider { margin: 24px 36px; border: none; border-top: 2px dashed #dde3ef; }
+
+        /* ── SUMMARY BAR ── */
+        .summary-bar {
+            margin: 0 36px 16px;
+            background: #f8fafd;
+            border: 1px solid #e8ecf2;
+            border-radius: 8px;
+            padding: 12px 18px;
+            font-size: 13px;
+            color: #4b5563;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .summary-bar strong { color: #1a2333; font-size: 15px; }
+
+        /* ── LEGEND ── */
+        .legend {
+            margin: 0 36px 16px;
+            background: #f8fafd;
+            border: 1px solid #e8ecf2;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-size: 13px;
+            color: #4b5563;
+            display: flex;
+            align-items: center;
+            gap: 0px;
+        }
+        .legend-label {
+            font-size: 11px; font-weight: 700; color: #9aa3b8;
+            letter-spacing: 1.2px; text-transform: uppercase;
+            padding-right: 4px;
+            line-height: 1;
+        }
+        .legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12.5px; font-weight: 400; color: #4b5563;
+            line-height: 1;
+        }
+        .legend-dot {
+            width: 10px; height: 10px;
+            border-radius: 3px;
+            flex-shrink: 0;
+            display: inline-block;
+            vertical-align: middle;
+            position: relative;
+        }
+        .legend-good .legend-dot      { background: #10b981; }
+        .legend-tentative .legend-dot { background: #f97316; }
+        .legend-urgent .legend-dot    { background: #ef4444; }
+
+        /* ── SECTION LABEL ── */
+        .section-label {
+            padding: 0 36px 10px;
+            font-size: 11px; font-weight: 600;
+            letter-spacing: 1.2px; text-transform: uppercase; color: #9aa3b8;
+        }
+
+        /* ── TABLE ── */
+        .table-wrap { padding: 0 36px; overflow-x: auto; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+
+        thead tr { background: #1a4fba; color: #ffffff; }
+        thead th {
+            padding: 11px 14px; text-align: left;
+            font-weight: 600; font-size: 12px; letter-spacing: 0.4px; white-space: nowrap;
+        }
+        thead th:first-child { border-radius: 6px 0 0 0; }
+        thead th:last-child  { border-radius: 0 6px 0 0; }
+
+        tbody tr { border-bottom: 1px solid #e8ecf2; }
+        tbody tr:last-child { border-bottom: none; }
+        tbody td { padding: 11px 14px; vertical-align: middle; color: #1a2333; }
+
+        .id-cell {
+            font-family: 'Courier New', monospace;
+            font-weight: 600; font-size: 13px; color: #1a4fba;
+        }
+        .date-cell { white-space: nowrap; color: #4b5563; }
+
+        /* ── SEVERITY BADGES ── */
+        .severity {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .severity-dot {
+            width: 9px; height: 9px;
+            border-radius: 3px;
+            flex-shrink: 0;
+            display: inline-block;
+            vertical-align: middle;
+            position: relative;
+            margin: 4px 3px;
+        }
+
+        /* Good */
+        .severity-good { background: #d1fae5; color: #065f46; }
+        .severity-good .severity-dot { background: #10b981; }
+
+        /* Tentative */
+        .severity-tentative { background: #ffedd5; color: #92400e; }
+        .severity-tentative .severity-dot { background: #f97316; }
+
+        /* Urgent */
+        .severity-urgent { background: #fee2e2; color: #991b1b; }
+        .severity-urgent .severity-dot { background: #ef4444; }
+
+        /* Row tints */
+        .row-good      { background: #f0fdf4; }
+        .row-tentative { background: #fff7ed; }
+        .row-urgent    { background: #fff1f2; }
+
+        /* ── ACTION CALLOUT ── */
+        .action-callout {
+            margin: 20px 36px 0;
+            background: #f0f5ff;
+            border-left: 4px solid #1a4fba;
+            border-radius: 0 6px 6px 0;
+            padding: 14px 18px;
+            font-size: 14px; color: #1e3a6e; line-height: 1.6;
+        }
+
+        /* ── FOOTER ── */
+        .footer {
+            margin: 24px 36px 0;
+            padding: 18px 0 28px;
+            border-top: 1px solid #e8ecf2;
+            font-size: 12px; color: #9aa3b8;
+            text-align: center; line-height: 1.7;
+        }
+        .footer a { color: #3b82f6; text-decoration: none; }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <div class="accent-bar"></div>
+    <div class="card">
+
+        <!-- HEADER -->
+        <div class="header">
+            <div class="header-logo">
+                <img src="cid:companyLogo" alt="Company Logo"
+                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+                <div class="header-logo-placeholder" style="display:none;">DSR</div>
+            </div>
+            <div class="header-text">
+                <h1>Data Subject Request Portal</h1>
+                <h2>Pending Requests - Admin Notification</h2>
+            </div>
+        </div>
+
+        <!-- ALERT BADGE -->
+        <div class="alert-badge-wrap">
+            <span class="alert-badge">
+                <svg width="15" height="15" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10 2L2 17h16L10 2z" stroke="#b45309" stroke-width="1.8" stroke-linejoin="round"/>
+                    <path d="M10 8v4M10 14.5v.5" stroke="#b45309" stroke-width="1.8" stroke-linecap="round"/>
+                </svg>
+                Action Required - Pending Requests Awaiting Review
+            </span>
+        </div>
+
+        <!-- BODY COPY -->
+        <div class="body-copy">
+            <p>Dear Admin of <span class="controller-name">{{ControllerName}}</span>,</p>
+            <p>
+                The following Data Subject Requests are currently in a <strong>pending state</strong> within
+                the DSR Portal. Please make the necessary arrangements to either
+                <strong>approve</strong> or <strong>reject</strong> these requests at your earliest convenience.
+            </p>
+            <p>
+                Requests that are approaching or have exceeded their expected resolution deadline are
+                highlighted accordingly. Your timely action ensures regulatory compliance and a positive
+                experience for the data subjects involved.
+            </p>
+        </div>
+
+        <hr class="divider" />
+
+        <!-- SUMMARY BAR (above legend + table) -->
+        <div class="summary-bar">
+            📋 &nbsp;Total pending requests for your organization: <strong>{{totalCount}}</strong>
+        </div>
+
+        <!-- LEGEND (above table) -->
+        <div class="legend">
+            <span class="legend-label">Legend</span>&nbsp;&nbsp;&nbsp;&nbsp;
+            <span class="legend-item legend-good">
+                <span class="legend-dot"></span>
+            &nbsp;&nbsp;Good &lt;14 days
+            </span>
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <span class="legend-item legend-tentative">
+                <span class="legend-dot"></span>
+            &nbsp;&nbsp;Tentative 14–20 days
+            </span>
+            &nbsp;&nbsp;
+            &nbsp;&nbsp;
+            <span class="legend-item legend-urgent">
+                <span class="legend-dot"></span>
+            &nbsp;&nbsp;Need Immediate Attention 21+ days
+            </span>
+        </div>
+
+        <!-- SECTION LABEL -->
+        <div class="section-label">Pending Requests Summary</div>
+
+        <!-- TABLE -->
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Request ID</th>
+                    <th>Created Date</th>
+                    <th>Due Date</th>
+                    <th>Severity Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{tableRows}}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ACTION CALLOUT -->
+        <div class="action-callout">
+            Please log in to the <strong>DSR Portal</strong> to review and take action on these requests.
+            Failing to process overdue requests may result in compliance violations.
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            © 2026 Your Company. All rights reserved.<br />
+            This is an automated notification — please do not reply to this email.<br />
+            <a href="#">DSR Portal</a> &nbsp;·&nbsp;
+            <a href="#">Privacy Policy</a> &nbsp;·&nbsp;
+            <a href="#">Support</a>
+        </div>
+
+    </div>
+</div>
+</body>
+</html>

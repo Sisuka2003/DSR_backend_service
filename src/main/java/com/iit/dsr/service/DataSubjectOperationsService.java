@@ -3,9 +3,7 @@ package com.iit.dsr.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.iit.dsr.controller.DataSubjectOperationsController;
-import com.iit.dsr.dto.requests.login.DataSubjectLoginRequestDTO;
 import com.iit.dsr.dto.requests.operations.DataSubjectOperationsRequestDto;
-import com.iit.dsr.dto.responses.commons.CommonResponseDTO;
 import com.iit.dsr.entity.*;
 import com.iit.dsr.repository.DataControllerRepository;
 import com.iit.dsr.repository.DataSubjectInControllerRepository;
@@ -19,15 +17,13 @@ import com.lowagie.text.Rectangle;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
-import jakarta.mail.MessagingException;
+import com.twilio.Twilio;
+import com.twilio.rest.verify.v2.service.Verification;
 import jakarta.mail.internet.MimeMessage;
-import jakarta.persistence.Column;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -61,6 +57,12 @@ public class DataSubjectOperationsService {
 
     @Autowired
     private JavaMailSender mailSender;
+
+    @Value("${twilio.account.sid}")
+    private String accountSid;
+
+    @Value("${twilio.account.token}")
+    private String accountToken;
 
     //Get Data Subjects Collected_data from the organization
     public ResponseEntity<?> getStoredData(DataSubjectOperationsRequestDto requestDto) {
@@ -102,7 +104,7 @@ public class DataSubjectOperationsService {
                 return dataSubjectInOrganizationEntity.getActivityStatus().getCode().equals(Constants.APPROVED) || dataSubjectInOrganizationEntity.getActivityStatus().getCode().equals(Constants.REJECTED) ?
                         dataSubjectInControllerRepository.updateDataSubjectDataOnApproval(requestDto.getCollectedData(),statusRepository.getStatusRecordFromCode(Constants.APPROVED).getId(), Integer.parseInt(requestDto.getRecordId()), Integer.parseInt(requestDto.getStatus())) > 0 ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA CORRECTION SUCCESS", null,null,false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "DATA CORRECTION FAILED", null,null,false)
                 :
-                        dataSubjectInControllerRepository.updateDataSubjectDataOnApprovalSkipped(requestDto.getCollectedData(),statusRepository.getStatusRecordFromCode(Constants.APPROVED).getId(),statusRepository.getStatusRecordFromCode(Constants.SKIPPED).getId(), Integer.parseInt(requestDto.getRecordId()), Integer.parseInt(requestDto.getStatus())) > 0 ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA CORRECTION SUCCESS", null,null,false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "DATA CORRECTION FAILED", null,null,false);
+                        dataSubjectInControllerRepository.updateDataSubjectDataOnApprovalSkipped(requestDto.getCollectedData(),statusRepository.getStatusRecordFromCode(Constants.APPROVED).getId(),statusRepository.getStatusRecordFromCode(Constants.APPROVED).getId(), Integer.parseInt(requestDto.getRecordId()), Integer.parseInt(requestDto.getStatus())) > 0 ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA CORRECTION SUCCESS", null,null,false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "DATA CORRECTION FAILED", null,null,false);
             }
 
             DataSubjectInOrganizationEntity pendingRecordsForSubjectInRequestOrg = dataSubjectInControllerRepository.checkForPendingRequestsByDataSubject(Integer.parseInt(requestDto.getDsCode()), Integer.parseInt(requestDto.getDcCode()), Constants.PENDING, Constants.QUEUED);
@@ -328,6 +330,14 @@ public class DataSubjectOperationsService {
             helper.addInline("companyLogo", logoFile);
 
             mailSender.send(message);
+
+//            Twilio.init(accountSid, accountToken);
+//            Verification verification = Verification.creator(
+//                            "VAaf0f2b9624a00ed4dfc2b4300f8db962",
+//                            "+94772712335",
+//                            "sms")
+//                    .create();
+//            System.out.println(verification.getSid());
             return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "SUCCESS TO PROCESS", code, null, false);
         } catch (Exception e) {
             e.printStackTrace();

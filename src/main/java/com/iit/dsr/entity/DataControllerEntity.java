@@ -47,4 +47,7 @@ public class DataControllerEntity {
 
     @Column(name = "agents", nullable = false)
     private Integer agents;
+
+    @Column(name = "email", nullable = false)
+    private String emailAddress;
 }
