@@ -71,12 +71,24 @@ public class LoginService {
                 return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_EMPTY, "SUBJECT DOES NOT EXISTS", null,null,false);
             }
 
-            DataSubjectInOrganizationEntity dataSubjectInOrganizationRecord = dataSubjectInControllerRepository.getCustomerRecordFromOrganization(dataSubjectsEntity.getId(),dataControllerId, Constants.ACTIVE, Constants.APPROVED,Constants.APPROVED);
-            if(Objects.isNull(dataSubjectInOrganizationRecord)){
+            List<DataSubjectInOrganizationEntity> dataSubjectInOrganizationRecordList = dataSubjectInControllerRepository.getDataSubjectLoginData(dataSubjectsEntity.getId(),dataControllerId, Constants.ACTIVE, Constants.APPROVED,Constants.APPROVED);
+            DataSubjectInOrganizationEntity dataSubjectApprovedLoginData = null;
+            if(dataSubjectInOrganizationRecordList.size() > 1) {
+                log.info(" multiple records exists");
+                 dataSubjectApprovedLoginData = dataSubjectInControllerRepository.getDataONlyAdminApprovalsArePassed(
+                         dataSubjectsEntity.getId(),
+                         dataControllerId,
+                         Constants.ACTIVE,
+                         Constants.APPROVED);
+            }else{
+                dataSubjectApprovedLoginData = dataSubjectInOrganizationRecordList.get(0);
+            }
+            log.info("data subject record :"+dataSubjectApprovedLoginData);
+            if(Objects.isNull(dataSubjectApprovedLoginData)){
                 return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_EMPTY, "SUBJECT DOES NOT EXISTS WITHIN THE ORGANIZATION", null,null,false);
             }
 
-            return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "SUCCESS", dataSubjectInOrganizationRecord,null,false);
+            return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "SUCCESS", dataSubjectApprovedLoginData,null,false);
         }catch (Exception e) {
             e.printStackTrace();
            return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "FAILED TO PROCESS", null,null,false);

@@ -16,6 +16,12 @@ public interface DataSubjectInControllerRepository extends JpaRepository<DataSub
     @Query("SELECT DSIO FROM DataSubjectInOrganizationEntity DSIO WHERE DSIO.dsCode.id = ?1 AND DSIO.dcCode.id = ?2 AND DSIO.status.code = ?3 AND (DSIO.activityStatus.code = ?3 OR DSIO.adminActivityStatus.code = ?4)")
     DataSubjectInOrganizationEntity getCustomerRecordFromOrganization(int dsCode, int dcCode,String statusCode,String agentApproved, String adminApproved);
 
+    @Query("SELECT DSIO FROM DataSubjectInOrganizationEntity DSIO WHERE DSIO.dsCode.id = ?1 AND DSIO.dcCode.id = ?2 AND DSIO.status.code = ?3 AND (DSIO.activityStatus.code = ?3 OR DSIO.adminActivityStatus.code = ?4)")
+    List<DataSubjectInOrganizationEntity> getDataSubjectLoginData(int dsCode, int dcCode,String statusCode,String agentApproved, String adminApproved);
+
+    @Query("SELECT DSIO FROM DataSubjectInOrganizationEntity DSIO WHERE DSIO.dsCode.id = ?1 AND DSIO.dcCode.id = ?2 AND DSIO.status.code = ?3 AND DSIO.adminActivityStatus.code = ?4")
+    DataSubjectInOrganizationEntity getDataONlyAdminApprovalsArePassed(int dsCode, int dcCode,String statusCode,String adminApproved);
+
 //    @Modifying
 //    @Query("UPDATE DataSubjectInOrganizationEntity DSIO SET DSIO.backupData = DSIO.collectedData, DSIO.collectedData =?1 WHERE DSIO.dsCode.id =?2 AND DSIO.dcCode.id =?3 AND DSIO.status.id =?4")
 //    int updateCollectedDataOfDataSubject(String collectedData,Integer dsCode, Integer dcCode, Integer statusCode);
@@ -29,8 +35,8 @@ public interface DataSubjectInControllerRepository extends JpaRepository<DataSub
     int updateDataSubjectDataOnApproval(String collectedData, Integer approvedStatus, Integer dsioId, Integer statusCode);
 
     @Modifying
-    @Query("UPDATE DataSubjectInOrganizationEntity DSIO SET DSIO.collectedData = DSIO.backupData, DSIO.backupData ='', DSIO.adminActivityStatus.id = ?1, DSIO.activityStatus.id =?2,DSIO.subjectActivityStatus.id =?3 WHERE DSIO.dsCode.id =?4 AND DSIO.dcCode.id =?5 AND DSIO.status.id =?6")
-    int rejectDataSubjectDataModificationOrDeletionRequestForUserOnly(Integer skippedAdminCode, Integer skippedAgentCode, Integer rejectedUserCode, Integer dsCode, Integer dcCode, Integer statusCode);
+    @Query("UPDATE DataSubjectInOrganizationEntity DSIO SET DSIO.collectedData = DSIO.backupData, DSIO.backupData ='', DSIO.adminActivityStatus.id = ?1, DSIO.activityStatus.id =?2,DSIO.subjectActivityStatus.id =?3 WHERE DSIO.id=?4")
+    int rejectDataSubjectDataModificationOrDeletionRequestForUserOnly(Integer skippedAdminCode, Integer skippedAgentCode, Integer rejectedUserCode, Integer recordId);
 
     @Modifying
     @Query("UPDATE DataSubjectInOrganizationEntity DSIO SET DSIO.collectedData = DSIO.backupData, DSIO.backupData ='', DSIO.adminActivityStatus.id = ?1, DSIO.activityStatus.id =?2 WHERE DSIO.dsCode.id =?3 AND DSIO.dcCode.id =?4 AND DSIO.status.id =?5")
@@ -58,8 +64,8 @@ public interface DataSubjectInControllerRepository extends JpaRepository<DataSub
     @Query("SELECT DSIO FROM DataSubjectInOrganizationEntity DSIO WHERE DSIO.dsCode.id = ?1 AND DSIO.dcCode.id = ?2 AND (DSIO.activityStatus.code = ?3 OR DSIO.activityStatus.code = ?4) ")
     DataSubjectInOrganizationEntity checkForPendingRequestsByDataSubject(int dsCode, int dcCode, String pendingStatusCode, String queuedStatusCode);
 
-    @Query("SELECT DSIO FROM DataSubjectInOrganizationEntity DSIO WHERE DSIO.dsCode.id = ?1 AND DSIO.dcCode.id = ?2 AND DSIO.status.code = ?3 ")
-    List<DataSubjectInOrganizationEntity> checkForRequestsByDataSubject(int dsCode, int dcCode, String activeStatusCode);
+    @Query("SELECT DSIO FROM DataSubjectInOrganizationEntity DSIO WHERE DSIO.dsCode.id = ?1 AND DSIO.dcCode.id = ?2 AND DSIO.status.id = ?3 ")
+    List<DataSubjectInOrganizationEntity> checkForRequestsByDataSubject(Integer dsCode, Integer dcCode, Integer activeStatusCode);
 
     @Query("SELECT COUNT(DSIO.id) FROM DataSubjectInOrganizationEntity DSIO WHERE DSIO.status.code =?1")
     int getAllRecordsCount(String statusCode);
@@ -86,4 +92,19 @@ public interface DataSubjectInControllerRepository extends JpaRepository<DataSub
 
     @Query("SELECT DSICR FROM DataSubjectInOrganizationEntity DSICR WHERE DSICR.dcCode.id =?1 AND DSICR.activityStatus.code=?2 AND DSICR.status.code=?3")
     List<DataSubjectInOrganizationEntity> getPendingDSRsFromDataController (Integer dataControllerId, String pendingStatusCode, String activeStatusCode);
+
+    @Modifying
+    @Query("""
+    UPDATE DataSubjectInOrganizationEntity DSIO
+    SET DSIO.status.id = ?3
+    WHERE DSIO.dsCode.id = ?1
+      AND DSIO.dcCode.id = ?2
+      AND DSIO.id <> ?4
+""")
+    int deactivatePreviousRecords(
+            Integer dsCode,
+            Integer dcCode,
+            Integer inactiveStatusId,
+            Integer currentRecordId
+    );
 }

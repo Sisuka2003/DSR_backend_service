@@ -14,6 +14,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DataControllerOperationsRequestDto {
+    @JsonProperty("id")
+    private String id;
     @JsonProperty("dcCode")
     private String dcCode;
     @JsonProperty("dsCode")

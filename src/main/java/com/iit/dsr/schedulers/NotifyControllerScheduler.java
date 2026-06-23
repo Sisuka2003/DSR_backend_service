@@ -17,7 +17,6 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 
@@ -34,8 +33,6 @@ public class NotifyControllerScheduler {
     private DataSubjectInControllerRepository dataSubjectInControllerRepository;
 
 
-    // ─────────────────────────────────────────────────────────────────────────
-
     @Scheduled(cron = "${scheduler.midnight.cron}", zone = "${scheduler.operating.zone}")
     public void runAtMidnightOnEveryDay() throws Exception {
 
@@ -45,7 +42,6 @@ public class NotifyControllerScheduler {
 
             List<DataSubjectInOrganizationEntity> pendingDSRs = dataSubjectInControllerRepository.getPendingDSRsFromDataController(dce.getId(), Constants.PENDING, Constants.ACTIVE);
 
-            // ── Build the HTML table rows ─────────────────────────────────────
             StringBuilder tableRows = new StringBuilder();
             int rowNum = 1;
 
@@ -101,7 +97,6 @@ public class NotifyControllerScheduler {
                 ));
             }
 
-            // ── Load and populate the HTML template ──────────────────────────
             String htmlTemplate;
             try (var inputStream = Objects.requireNonNull(
                     DataSubjectOperationsController.class
@@ -115,12 +110,11 @@ public class NotifyControllerScheduler {
                     .replace("{{tableRows}}", tableRows.toString())
                     .replace("{{totalCount}}", String.valueOf(pendingDSRs.size()));
 
-            // ── Build and send the email ──────────────────────────────────────
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
             helper.setFrom("sisukaweerasinghe@gmail.com");
-            helper.setTo("sisukaweerasinghe@gmail.com");           // send to the controller's own email
+            helper.setTo("sisukaweerasinghe@gmail.com");
             helper.setSubject("Action Required: Pending Data Subject Requests — " + dce.getOrgName());
             helper.setText(htmlTemplate, true);
 

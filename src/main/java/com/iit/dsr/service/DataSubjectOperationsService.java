@@ -101,11 +101,36 @@ public class DataSubjectOperationsService {
                 }
 
                 log.info("DataSubjectOperationsService => updatedStoredData => controller requesting to accept or reject request");
-                return dataSubjectInOrganizationEntity.getActivityStatus().getCode().equals(Constants.APPROVED) || dataSubjectInOrganizationEntity.getActivityStatus().getCode().equals(Constants.REJECTED) ?
-                        dataSubjectInControllerRepository.updateDataSubjectDataOnApproval(requestDto.getCollectedData(),statusRepository.getStatusRecordFromCode(Constants.APPROVED).getId(), Integer.parseInt(requestDto.getRecordId()), Integer.parseInt(requestDto.getStatus())) > 0 ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA CORRECTION SUCCESS", null,null,false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "DATA CORRECTION FAILED", null,null,false)
-                :
-                        dataSubjectInControllerRepository.updateDataSubjectDataOnApprovalSkipped(requestDto.getCollectedData(),statusRepository.getStatusRecordFromCode(Constants.APPROVED).getId(),statusRepository.getStatusRecordFromCode(Constants.APPROVED).getId(), Integer.parseInt(requestDto.getRecordId()), Integer.parseInt(requestDto.getStatus())) > 0 ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA CORRECTION SUCCESS", null,null,false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "DATA CORRECTION FAILED", null,null,false);
-            }
+
+                dataSubjectInControllerRepository.deactivatePreviousRecords(
+                        dataSubjectInOrganizationEntity.getDsCode().getId(),
+                        dataSubjectInOrganizationEntity.getDcCode().getId(),
+                        2, // inactive status id
+                        dataSubjectInOrganizationEntity.getId()
+                );
+
+                if(dataSubjectInOrganizationEntity.getActivityStatus().getCode().equals(Constants.APPROVED) || dataSubjectInOrganizationEntity.getActivityStatus().getCode().equals(Constants.REJECTED)) {
+                   if(dataSubjectInControllerRepository.updateDataSubjectDataOnApproval(
+                           requestDto.getCollectedData(),
+                           statusRepository.getStatusRecordFromCode(Constants.APPROVED).getId(),
+                           Integer.parseInt(requestDto.getRecordId()),
+                           Integer.parseInt(requestDto.getStatus())) > 0){
+                    return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA CORRECTION SUCCESS", null, null, false);
+                   }else{
+                     return  commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "DATA CORRECTION FAILED", null, null, false);
+                   }
+                }else{
+                        if(dataSubjectInControllerRepository.updateDataSubjectDataOnApprovalSkipped(
+                                requestDto.getCollectedData(),
+                                statusRepository.getStatusRecordFromCode(Constants.APPROVED).getId(),
+                                statusRepository.getStatusRecordFromCode(Constants.APPROVED).getId(),
+                                Integer.parseInt(requestDto.getRecordId()),
+                                Integer.parseInt(requestDto.getStatus())) > 0){
+                         return    commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA CORRECTION SUCCESS", null,null,false);
+                    } else {
+                       return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "DATA CORRECTION FAILED", null, null, false);
+                    }
+            }}
 
             DataSubjectInOrganizationEntity pendingRecordsForSubjectInRequestOrg = dataSubjectInControllerRepository.checkForPendingRequestsByDataSubject(Integer.parseInt(requestDto.getDsCode()), Integer.parseInt(requestDto.getDcCode()), Constants.PENDING, Constants.QUEUED);
 
@@ -114,17 +139,18 @@ public class DataSubjectOperationsService {
                 return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "PENDING RECORD EXISTS", null,null,false);
             }
 
-            List<DataSubjectInOrganizationEntity> dataSubjectInOrganizationEntity = dataSubjectInControllerRepository.checkForRequestsByDataSubject(Integer.parseInt(requestDto.getDsCode()), Integer.parseInt(requestDto.getDcCode()), Constants.ACTIVE);
+            List<DataSubjectInOrganizationEntity> dataSubjectInOrganizationEntity = dataSubjectInControllerRepository.checkForRequestsByDataSubject(Integer.parseInt(requestDto.getDsCode()), Integer.parseInt(requestDto.getDcCode()), 1);
 
             String collectedData = null;
             for(DataSubjectInOrganizationEntity record :dataSubjectInOrganizationEntity){
                 if(record.getAdminActivityStatus().getCode().equals(Constants.APPROVED)){
                     collectedData = record.getCollectedData();
+                    break;
                 }else{
                     collectedData =null;
                 }
             }
-
+            log.info("collected data is :"+collectedData);
             DataSubjectInOrganizationEntity dataSubjectInOrganizationEntityForModification = new DataSubjectInOrganizationEntity();
             dataSubjectInOrganizationEntityForModification.setStatus( statusRepository.getStatusRecordFromCode(Constants.ACTIVE));
             dataSubjectInOrganizationEntityForModification.setDsCode(dataSubjectRepository.findById(Integer.parseInt(requestDto.getDsCode())).orElse(null));

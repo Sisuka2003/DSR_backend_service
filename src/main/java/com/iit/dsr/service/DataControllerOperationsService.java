@@ -126,7 +126,14 @@ public class DataControllerOperationsService {
         try {
             log.info("DataControllerOperationsService => rejectDataSubjectDataModificationOrDeletionRequest() => invoked with "+requestDto);
             if(requestDto.getIsUserProfile()){
-                return dataSubjectInControllerRepository.rejectDataSubjectDataModificationOrDeletionRequestForUserOnly(statusRepository.getStatusRecordFromCode(Constants.SKIPPED).getId(),statusRepository.getStatusRecordFromCode(Constants.SKIPPED).getId(), statusRepository.getStatusRecordFromCode(Constants.REJECTED).getId(),Integer.parseInt(requestDto.getDsCode()), Integer.parseInt(requestDto.getDcCode()), Integer.parseInt(requestDto.getStatus())) > 0 ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA CORRECTION SUCCESS", null,null,false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "DATA CORRECTION FAILED", null,null,false);
+                return dataSubjectInControllerRepository.rejectDataSubjectDataModificationOrDeletionRequestForUserOnly(
+                        statusRepository.getStatusRecordFromCode(Constants.REJECTED).getId(),
+                        statusRepository.getStatusRecordFromCode(Constants.REJECTED).getId(),
+                        statusRepository.getStatusRecordFromCode(Constants.REJECTED).getId(),
+                        Integer.parseInt(requestDto.getId())) > 0 ?
+                        commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA CORRECTION SUCCESS", null,null,false)
+                        :
+                        commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "DATA CORRECTION FAILED", null,null,false);
             }
             return dataSubjectInControllerRepository.rejectDataSubjectDataModificationOrDeletionRequest(statusRepository.getStatusRecordFromCode(Constants.REJECTED).getId(),statusRepository.getStatusRecordFromCode(Constants.REJECTED).getId(), Integer.parseInt(requestDto.getDsCode()), Integer.parseInt(requestDto.getDcCode()), Integer.parseInt(requestDto.getStatus())) > 0 ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA CORRECTION SUCCESS", null,null,false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "DATA CORRECTION FAILED", null,null,false);
         }catch (Exception e){
