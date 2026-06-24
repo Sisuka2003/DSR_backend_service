@@ -21,4 +21,5 @@ public class DashboardResponseDTO {
     int rejectedRecordsCount;
     int queuedRecordsCount;
     int approvedRecordsCount;
+    int expiredRecordsCount;
 }

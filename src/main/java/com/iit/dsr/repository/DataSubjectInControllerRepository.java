@@ -6,10 +6,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Repository
+@Transactional
 public interface DataSubjectInControllerRepository extends JpaRepository<DataSubjectInOrganizationEntity, Integer> {
 
 
@@ -39,8 +41,8 @@ public interface DataSubjectInControllerRepository extends JpaRepository<DataSub
     int rejectDataSubjectDataModificationOrDeletionRequestForUserOnly(Integer skippedAdminCode, Integer skippedAgentCode, Integer rejectedUserCode, Integer recordId);
 
     @Modifying
-    @Query("UPDATE DataSubjectInOrganizationEntity DSIO SET DSIO.collectedData = DSIO.backupData, DSIO.backupData ='', DSIO.adminActivityStatus.id = ?1, DSIO.activityStatus.id =?2 WHERE DSIO.dsCode.id =?3 AND DSIO.dcCode.id =?4 AND DSIO.status.id =?5")
-    int rejectDataSubjectDataModificationOrDeletionRequest(Integer rejectedCode, Integer skippedCode, Integer dsCode, Integer dcCode, Integer statusCode);
+    @Query("UPDATE DataSubjectInOrganizationEntity DSIO SET DSIO.collectedData = DSIO.backupData, DSIO.backupData ='', DSIO.adminActivityStatus.id = ?1, DSIO.activityStatus.id =?2 WHERE DSIO.id=?3 AND DSIO.status.id =?4")
+    int rejectDataSubjectDataModificationOrDeletionRequest(Integer rejectedCode, Integer skippedCode, Integer recordId, Integer statusCode);
 
     @Modifying
     @Query("UPDATE DataSubjectInOrganizationEntity DSIO SET DSIO.status.id = ?3 WHERE DSIO.dsCode.id =?1 AND DSIO.dcCode.id =?2")
@@ -107,4 +109,18 @@ public interface DataSubjectInControllerRepository extends JpaRepository<DataSub
             Integer inactiveStatusId,
             Integer currentRecordId
     );
+
+    @Modifying
+    @Query("UPDATE " +
+            "DataSubjectInOrganizationEntity DSIO " +
+            "SET " +
+            "DSIO.status.id = 2, " +
+            "DSIO.activityStatus.id = 8, " +
+            "DSIO.adminActivityStatus.id = 8, " +
+            "DSIO.subjectActivityStatus.id = 8 " +
+            "WHERE " +
+            "DSIO.id= ?1 " +
+            "AND " +
+            "DSIO.adminActivityStatus.code = 'PEND'")
+    int updateRecordToExpiredWithId(Integer id);
 }

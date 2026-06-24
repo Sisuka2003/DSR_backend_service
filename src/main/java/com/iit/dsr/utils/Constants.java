@@ -13,6 +13,7 @@ public class Constants {
     public static final String QUEUED = "QUEU";
     public static final String PENDING = "PEND";
     public static final String APPROVED = "APPR";
+    public static final String EXPIRED = "EXPD";
     public static final String CANCELLED = "CANC";
     public static final String SKIPPED = "SKIP";
     public static final String NIC = "NIC";

@@ -135,7 +135,15 @@ public class DataControllerOperationsService {
                         :
                         commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "DATA CORRECTION FAILED", null,null,false);
             }
-            return dataSubjectInControllerRepository.rejectDataSubjectDataModificationOrDeletionRequest(statusRepository.getStatusRecordFromCode(Constants.REJECTED).getId(),statusRepository.getStatusRecordFromCode(Constants.REJECTED).getId(), Integer.parseInt(requestDto.getDsCode()), Integer.parseInt(requestDto.getDcCode()), Integer.parseInt(requestDto.getStatus())) > 0 ? commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA CORRECTION SUCCESS", null,null,false) : commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "DATA CORRECTION FAILED", null,null,false);
+            return dataSubjectInControllerRepository.rejectDataSubjectDataModificationOrDeletionRequest(
+                    statusRepository.getStatusRecordFromCode(Constants.REJECTED).getId(),
+                    statusRepository.getStatusRecordFromCode(Constants.REJECTED).getId(),
+                    Integer.parseInt(requestDto.getId()),
+                    Integer.parseInt(requestDto.getStatus())) > 0 ?
+
+                    commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS, "DATA CORRECTION SUCCESS", null,null,false)
+                    :
+                    commonUtils.generateResponseObject(Constants.RESPONSE_CODE_FAILED, "DATA CORRECTION FAILED", null,null,false);
         }catch (Exception e){
             log.info("DataControllerOperationsService => rejectDataSubjectDataModificationOrDeletionRequest() => Failed To Process");
             e.printStackTrace();
@@ -153,6 +161,7 @@ public class DataControllerOperationsService {
             dce.setOrgStatus(statusRepository.getStatusRecordFromCode(Constants.ACTIVE));
             dce.setAgents(Integer.parseInt(requestDto.getAgentCount()));
             dce.setNotifications(0);
+            dce.setEmailAddress(requestDto.getOrgEmailAddress());
             dce.setLastUpdatedTime(currentTime);
             dce.setCreatedTime(currentTime);
             dce.setIdentificationKey(keyIdenticationKeyRepository.findById(Integer.parseInt(requestDto.getIdKey())).orElse(null));

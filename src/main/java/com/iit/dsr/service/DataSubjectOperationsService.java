@@ -109,7 +109,10 @@ public class DataSubjectOperationsService {
                         dataSubjectInOrganizationEntity.getId()
                 );
 
-                if(dataSubjectInOrganizationEntity.getActivityStatus().getCode().equals(Constants.APPROVED) || dataSubjectInOrganizationEntity.getActivityStatus().getCode().equals(Constants.REJECTED)) {
+                if(dataSubjectInOrganizationEntity.getActivityStatus().getCode().equals(Constants.APPROVED)
+                        ||
+                        dataSubjectInOrganizationEntity.getActivityStatus().getCode().equals(Constants.REJECTED)) {
+
                    if(dataSubjectInControllerRepository.updateDataSubjectDataOnApproval(
                            requestDto.getCollectedData(),
                            statusRepository.getStatusRecordFromCode(Constants.APPROVED).getId(),

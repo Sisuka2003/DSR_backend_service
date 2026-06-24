@@ -26,7 +26,8 @@ public class DataControllerOperationsRequestDto {
     private String status;
     @JsonProperty("isUserProfile")
     private Boolean isUserProfile;
-
+    @JsonProperty("orgEmailAddress")
+    private String orgEmailAddress;
     @JsonProperty("orgName")
     private String orgName;
     @JsonProperty("idKey")

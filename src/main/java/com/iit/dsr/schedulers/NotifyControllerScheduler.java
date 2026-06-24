@@ -7,11 +7,13 @@ import com.iit.dsr.repository.DataControllerRepository;
 import com.iit.dsr.repository.DataSubjectInControllerRepository;
 import com.iit.dsr.utils.Constants;
 import jakarta.mail.internet.MimeMessage;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -19,8 +21,9 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
-
+@Log4j2
 @Component
+@Transactional
 public class NotifyControllerScheduler {
 
     @Autowired
@@ -64,6 +67,16 @@ public class NotifyControllerScheduler {
                     severityClass = "severity-urgent";
                     severityLabel = "Need Immediate Attention";
                     rowClass      = "row-urgent";
+                    log.info("request id is :"+ dsr.getId());
+                    int i = dataSubjectInControllerRepository.updateRecordToExpiredWithId(
+                            dsr.getId());
+
+                    if(i == 1){
+                        log.info("Expiration update True");
+                    }else{
+                        log.info("Expiration update False");
+                    }
+
                 } else if (daysPending >= Constants.TENTATIVE_THRESHOLD_DAYS) {
                     severityClass = "severity-tentative";
                     severityLabel = "Tentative";
@@ -96,7 +109,54 @@ public class NotifyControllerScheduler {
                         severityLabel
                 ));
             }
+            List<DataSubjectInOrganizationEntity> expiredDSRs = dataSubjectInControllerRepository.getPendingDSRsFromDataController(dce.getId(), Constants.EXPIRED, Constants.DEACTIVE);
 
+            for (DataSubjectInOrganizationEntity dsr : expiredDSRs) {
+
+                LocalDate createdDate = dsr.getCreatedTime()
+                        .toLocalDateTime()
+                        .toLocalDate();
+
+                long daysPending = ChronoUnit.DAYS.between(createdDate, LocalDate.now());
+
+                LocalDate dueDate = createdDate.plusDays(Constants.SLA_DAYS);
+
+                // Determine severity
+                String severityClass = null;
+                String severityLabel = null;
+                String rowClass = null;
+
+                if (daysPending >= Constants.URGENT_THRESHOLD_DAYS) {
+                    severityClass = "severity-urgent";
+                    severityLabel = "Expired Request";
+                    rowClass      = "row-urgent";
+                    log.info("request id is :"+ dsr.getId());
+                }
+
+                tableRows.append(String.format("""
+                        <tr class="%s">
+                            <td>%d</td>
+                            <td class="id-cell">DSR-%05d</td>
+                            <td class="date-cell">%s</td>
+                            <td class="date-cell">%s</td>
+                            <td>
+                                <span class="severity %s">
+                                    <span class="severity-dot"></span>%s
+                                </span>
+                            </td>
+                        </tr>
+                        """,
+                        rowClass,
+                        rowNum++,
+                        dsr.getId(),
+                        createdDate.format(Constants.DATE_FMT),
+                        dueDate.format(Constants.DATE_FMT),
+                        severityClass,
+                        severityLabel
+                ));
+
+                pendingDSRs.add(dsr);
+            }
             String htmlTemplate;
             try (var inputStream = Objects.requireNonNull(
                     DataSubjectOperationsController.class
@@ -123,5 +183,8 @@ public class NotifyControllerScheduler {
 
             mailSender.send(message);
         }
+
+
+
     }
 }

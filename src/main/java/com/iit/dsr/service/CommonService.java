@@ -76,6 +76,7 @@ public class CommonService {
                 dashboardResponseDTO.setApprovedRecordsCount(dataSubjectInControllerRepository.getAllApprovedRecordsCount(Constants.APPROVED));
                 dashboardResponseDTO.setQueuedRecordsCount(dataSubjectInControllerRepository.getAllQueuedRecordsCount(Constants.QUEUED));
                 dashboardResponseDTO.setRejectedRecordsCount(dataSubjectInControllerRepository.getAllRejectedRecordsCount(Constants.REJECTED));
+                dashboardResponseDTO.setExpiredRecordsCount(dataSubjectInControllerRepository.getAllRejectedRecordsCount(Constants.EXPIRED));
             }
             return commonUtils.generateResponseObject(Constants.RESPONSE_CODE_SUCCESS,"SUCCESSFULLY PROCESSED",dashboardResponseDTO,null,false);
         }catch (Exception e){
